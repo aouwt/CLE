@@ -20,7 +20,7 @@ DIM SHARED Board(512, 512) AS Cell
 DIM SHARED AS UNSIGNED INTEGER CellW, CellH
 LoadBoard "light.txt"
 
-f& = LOADFONT("/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf", 32, "MONOSPACE")
+f& = 8
 CellW = FONTWIDTH(f&): CellH = FONTHEIGHT(f&)
 SCREEN NEWIMAGE(UBOUND(Board, 1) * CellW, UBOUND(Board, 2) * CellH, 32)
 FONT f&
@@ -30,7 +30,7 @@ DIM x~%, y~%
 DO
     UpdateBeams
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-        CALL CheckCell(Board(x~%, y~%))
+            CALL CheckCell(Board(x~%, y~%))
     NEXT y~%, x~%
     'DrawBoard: ' SLEEp
     DrawBoard ': SLEEP
@@ -58,7 +58,7 @@ SUB LoadBoard (filename$)
     REDIM Board(w~%, h~%) AS Cell
 
     FOR x~% = 0 TO w~%: FOR y~% = 0 TO h~%
-        Board(x~%, y~%) = NewBoard(x~%, y~%)
+            Board(x~%, y~%) = NewBoard(x~%, y~%)
     NEXT y~%, x~%
 
     CLOSE #fn~%
@@ -71,8 +71,8 @@ SUB UpdateBeams
     'DIM newboard(16, 16) AS Colors
     DIM x~%, y~%
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-        NewBoard(x~%, y~%) = Board(x~%, y~%).C
-        Board(x~%, y~%).C = BlankCell.C
+            NewBoard(x~%, y~%) = Board(x~%, y~%).C
+            Board(x~%, y~%).C = BlankCell.C
     NEXT y~%, x~%
     FOR x~% = 0 TO UBOUND(Board, 1)
         FOR y~% = 0 TO UBOUND(Board, 2)
@@ -114,28 +114,6 @@ END SUB
 SUB CheckCell (Cell AS Cell)
     DIM NewC AS Colors
 
-    DIM AS UNSIGNED LONG VC, HC
-    IF (Cell.C.L <> 0) AND (Cell.C.R <> 0) THEN
-        HC = RGB32(RED32(Cell.C.L) + RED32(Cell.C.R), GREEN32(Cell.C.L) + GREEN32(Cell.C.R), BLUE32(Cell.C.L) + BLUE32(Cell.C.R))
-        Cell.C.L = HC
-        Cell.C.R = HC
-    ELSE HC = Cell.C.R OR Cell.C.L
-    END IF
-
-    IF (Cell.C.U <> 0) AND (Cell.C.D <> 0) THEN
-        VC = RGB32(RED32(Cell.C.U) + RED32(Cell.C.D), GREEN32(Cell.C.U) + GREEN32(Cell.C.D), BLUE32(Cell.C.U) + BLUE32(Cell.C.D))
-        Cell.C.U = VC
-        Cell.C.D = VC
-    ELSE VC = Cell.C.U OR Cell.C.D
-    END IF
-
-    'IF HC <> 0 AND VC <> 0 THEN 'intersection filter
-    '    Cell.C.L = Filter(Cell.C.L, VC)
-    '    Cell.C.R = Filter(Cell.C.R, VC)
-    '    Cell.C.U = Filter(Cell.C.U, HC)
-    '    Cell.C.D = Filter(Cell.C.D, HC)
-    'END IF
-
 
     SELECT CASE Cell.Thing
         'COLORS!
@@ -173,6 +151,10 @@ SUB CheckCell (Cell AS Cell)
                     (BLUE32(Cell.C.L) + BLUE32(Cell.C.R) + BLUE32(Cell.C.U) + BLUE32(Cell.C.D)) / 4) _
                 )
 
+        CASE "{" 'solar panel
+            w~& = (RED32(Cell.C.L) + GREEN32(Cell.C.L) + BLUE32(Cell.C.L)) / 3
+            Cell.C.L = RGB32(w~&, w~&, w~&)
+            Cell.C.U = 0: Cell.C.D = 0: Cell.C.R = 0
 
             'LIGHT FLOW
         CASE "<": Cell.C.L = Merge(Cell.C)
@@ -206,7 +188,30 @@ SUB CheckCell (Cell AS Cell)
             '    tmp~%% = (Cell.C.L <> 0) + (Cell.C.R <> 0) + (Cell.C.U <> 0) + (Cell.C.D <> 0)
             '    IF tmp~%% < 2 THEN Cell.C = BlankCell.C
 
-        CASE CHR$(0): Cell.Thing = " "
+        CASE " "
+            DIM AS UNSIGNED LONG VC, HC
+            IF (Cell.C.L <> 0) AND (Cell.C.R <> 0) THEN
+                HC = RGB32(RED32(Cell.C.L) + RED32(Cell.C.R), GREEN32(Cell.C.L) + GREEN32(Cell.C.R), BLUE32(Cell.C.L) + BLUE32(Cell.C.R))
+                Cell.C.L = HC
+                Cell.C.R = HC
+            ELSE HC = Cell.C.R OR Cell.C.L
+            END IF
+
+            IF (Cell.C.U <> 0) AND (Cell.C.D <> 0) THEN
+                VC = RGB32(RED32(Cell.C.U) + RED32(Cell.C.D), GREEN32(Cell.C.U) + GREEN32(Cell.C.D), BLUE32(Cell.C.U) + BLUE32(Cell.C.D))
+                Cell.C.U = VC
+                Cell.C.D = VC
+            ELSE VC = Cell.C.U OR Cell.C.D
+            END IF
+
+            IF HC <> 0 AND VC <> 0 THEN 'intersection filter
+                Cell.C.L = Filter(Cell.C.L, VC)
+                Cell.C.R = Filter(Cell.C.R, VC)
+                Cell.C.U = Filter(Cell.C.U, HC)
+                Cell.C.D = Filter(Cell.C.D, HC)
+            END IF
+
+        CASE ELSE: Cell.Thing = " "
     END SELECT
 
 END SUB
