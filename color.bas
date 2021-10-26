@@ -155,6 +155,11 @@ SUB CheckCell (Cell AS Cell)
             w~& = (RED32(Cell.C.L) + GREEN32(Cell.C.L) + BLUE32(Cell.C.L)) / 3
             Cell.C.L = RGB32(w~&, w~&, w~&)
             Cell.C.U = 0: Cell.C.D = 0: Cell.C.R = 0
+        CASE "}"
+            w~& = (RED32(Cell.C.R) + GREEN32(Cell.C.R) + BLUE32(Cell.C.R)) / 3
+            Cell.C.R = RGB32(w~&, w~&, w~&)
+            Cell.C.U = 0: Cell.C.D = 0: Cell.C.L = 0
+
 
             'LIGHT FLOW
         CASE "<": Cell.C.L = Merge(Cell.C)
@@ -164,8 +169,6 @@ SUB CheckCell (Cell AS Cell)
 
         CASE "(": IF Cell.C.L THEN Cell.C.R = Cell.C.L: Cell.C.L = 0
         CASE ")": IF Cell.C.R THEN Cell.C.L = Cell.C.R: Cell.C.R = 0
-
-            'case "[":if
 
 
         CASE "\"
@@ -224,7 +227,10 @@ END FUNCTION
 
 
 FUNCTION Filter~& (IC~&, FC~&)
-    Filter~& = RGB32(RED32(IC~&) * (RED32(FC~&) / 255), GREEN32(IC~&) * (GREEN32(FC~&) / 255), BLUE32(IC~&) * (BLUE32(FC~&) / 255))
+    maxc~%% = RED32(FC~&)
+    IF GREEN32(FC~&) > maxc~%% THEN maxc~%% = GREEN32(FC~&)
+    IF BLUE32(FC~&) > maxc~%% THEN maxc~%% = BLUE32(FC~&)
+    Filter~& = RGB32(RED32(IC~&) * (RED32(FC~&) / maxc~%%), GREEN32(IC~&) * (GREEN32(FC~&) / maxc~%%), BLUE32(IC~&) * (BLUE32(FC~&) / maxc~%%))
 END FUNCTION
 
 SUB DistColor (C AS Colors, C~&)
