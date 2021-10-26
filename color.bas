@@ -30,7 +30,7 @@ DIM x~%, y~%
 DO
     UpdateBeams
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-            CALL CheckCell(Board(x~%, y~%))
+        CALL CheckCell(Board(x~%, y~%))
     NEXT y~%, x~%
     'DrawBoard: ' SLEEp
     DrawBoard ': SLEEP
@@ -58,7 +58,7 @@ SUB LoadBoard (filename$)
     REDIM Board(w~%, h~%) AS Cell
 
     FOR x~% = 0 TO w~%: FOR y~% = 0 TO h~%
-            Board(x~%, y~%) = NewBoard(x~%, y~%)
+        Board(x~%, y~%) = NewBoard(x~%, y~%)
     NEXT y~%, x~%
 
     CLOSE #fn~%
@@ -71,8 +71,8 @@ SUB UpdateBeams
     'DIM newboard(16, 16) AS Colors
     DIM x~%, y~%
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-            NewBoard(x~%, y~%) = Board(x~%, y~%).C
-            Board(x~%, y~%).C = BlankCell.C
+        NewBoard(x~%, y~%) = Board(x~%, y~%).C
+        Board(x~%, y~%).C = BlankCell.C
     NEXT y~%, x~%
     FOR x~% = 0 TO UBOUND(Board, 1)
         FOR y~% = 0 TO UBOUND(Board, 2)
@@ -227,9 +227,11 @@ END FUNCTION
 
 
 FUNCTION Filter~& (IC~&, FC~&)
+    IF IC~& = 0 THEN EXIT FUNCTION
     maxc~%% = RED32(FC~&)
     IF GREEN32(FC~&) > maxc~%% THEN maxc~%% = GREEN32(FC~&)
     IF BLUE32(FC~&) > maxc~%% THEN maxc~%% = BLUE32(FC~&)
+    IF maxc~%% = 0 THEN EXIT FUNCTION
     Filter~& = RGB32(RED32(IC~&) * (RED32(FC~&) / maxc~%%), GREEN32(IC~&) * (GREEN32(FC~&) / maxc~%%), BLUE32(IC~&) * (BLUE32(FC~&) / maxc~%%))
 END FUNCTION
 
@@ -242,3 +244,4 @@ SUB DistColor (C AS Colors, C~&)
     )
     C.L = M~&: C.R = M~&: C.U = M~&: C.D = M~&
 END SUB
+
