@@ -11,6 +11,7 @@ END TYPE
 TYPE Cell
     AS STRING * 1 Thing
     AS Colors C
+    AS UNSIGNED LONG State
 END TYPE
 
 
@@ -30,7 +31,7 @@ DIM x~%, y~%
 DO
     UpdateBeams
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-        CALL CheckCell(Board(x~%, y~%))
+            CALL CheckCell(Board(x~%, y~%))
     NEXT y~%, x~%
     'DrawBoard: ' SLEEp
     DrawBoard ': SLEEP
@@ -58,7 +59,7 @@ SUB LoadBoard (filename$)
     REDIM Board(w~%, h~%) AS Cell
 
     FOR x~% = 0 TO w~%: FOR y~% = 0 TO h~%
-        Board(x~%, y~%) = NewBoard(x~%, y~%)
+            Board(x~%, y~%) = NewBoard(x~%, y~%)
     NEXT y~%, x~%
 
     CLOSE #fn~%
@@ -71,16 +72,16 @@ SUB UpdateBeams
     'DIM newboard(16, 16) AS Colors
     DIM x~%, y~%
     FOR x~% = 0 TO UBOUND(Board, 1): FOR y~% = 0 TO UBOUND(Board, 2)
-        NewBoard(x~%, y~%) = Board(x~%, y~%).C
-        Board(x~%, y~%).C = BlankCell.C
+            NewBoard(x~%, y~%) = Board(x~%, y~%).C
+            Board(x~%, y~%).C = BlankCell.C
     NEXT y~%, x~%
     FOR x~% = 0 TO UBOUND(Board, 1)
         FOR y~% = 0 TO UBOUND(Board, 2)
 
-            IF x~% <> UBOUND(Board, 1) THEN Board(x~%, y~%).C.L = NewBoard(x~% + 1, y~%).L
-            IF y~% <> UBOUND(Board, 2) THEN Board(x~%, y~%).C.U = NewBoard(x~%, y~% + 1).U
-            IF x~% THEN Board(x~%, y~%).C.R = NewBoard(x~% - 1, y~%).R
-            IF y~% THEN Board(x~%, y~%).C.D = NewBoard(x~%, y~% - 1).D
+            IF x~% <> UBOUND(Board, 1) THEN Board(x~%, y~%).C.L = NewBoard(x~% + 1, y~%).L AND &H00FFFFFF~&
+            IF y~% <> UBOUND(Board, 2) THEN Board(x~%, y~%).C.U = NewBoard(x~%, y~% + 1).U AND &H00FFFFFF~&
+            IF x~% THEN Board(x~%, y~%).C.R = NewBoard(x~% - 1, y~%).R AND &H00FFFFFF~&
+            IF y~% THEN Board(x~%, y~%).C.D = NewBoard(x~%, y~% - 1).D AND &H00FFFFFF~&
 
     NEXT y~%, x~%
 END SUB
@@ -88,21 +89,22 @@ END SUB
 
 SUB DrawBoard
     CLS
-    _LIMIT 10
+    _LIMIT 1
     DIM x~%, y~%, px~%, py~%
     FOR x~% = 0 TO UBOUND(Board, 1)
         px~% = x~% * CellW
         FOR y~% = 0 TO UBOUND(Board, 2)
             py~% = y~% * CellH
-            IF Board(x~%, y~%).C.L THEN LINE (px~%, py~% + CellH / 2)-STEP(CellW, 0), Board(x~%, y~%).C.L
-            IF Board(x~%, y~%).C.R THEN LINE (px~%, py~% + CellH / 2)-STEP(CellW, 0), Board(x~%, y~%).C.R
-            IF Board(x~%, y~%).C.U THEN LINE (px~% + CellW / 2, py~%)-STEP(0, CellH), Board(x~%, y~%).C.U
-            IF Board(x~%, y~%).C.D THEN LINE (px~% + CellW / 2, py~%)-STEP(0, CellH), Board(x~%, y~%).C.D
+            IF Board(x~%, y~%).C.L THEN LINE (px~%, py~% + CellH / 2)-STEP(CellW, 0), Board(x~%, y~%).C.L OR C_Black
+            IF Board(x~%, y~%).C.R THEN LINE (px~%, py~% + CellH / 2)-STEP(CellW, 0), Board(x~%, y~%).C.R OR C_Black
+            IF Board(x~%, y~%).C.U THEN LINE (px~% + CellW / 2, py~%)-STEP(0, CellH), Board(x~%, y~%).C.U OR C_Black
+            IF Board(x~%, y~%).C.D THEN LINE (px~% + CellW / 2, py~%)-STEP(0, CellH), Board(x~%, y~%).C.D OR C_Black
 
 
             'IF Board(x~%, y~%).Thing = " " THEN
             '    PRINTSTRING (px~%, py~%), "ù"
             ' ELSE
+            IF Board(x~%, y~%).State THEN COLOR Board(x~%, y~%).State OR C_Black ELSE COLOR C_White
             PRINTSTRING (px~%, py~%), Board(x~%, y~%).Thing
             'END IF
     NEXT y~%, x~%
@@ -136,6 +138,14 @@ SUB CheckCell (Cell AS Cell)
         CASE "m": CALL DistColor(Cell.C, C_Magenta): Cell.Thing = ""
 
 
+        CASE "?" 'tofu!
+            IF Cell.State THEN
+                CALL DistColor(Cell.C, Cell.State)
+            ELSE
+                Cell.State = Merge(Cell.C)
+            END IF
+
+
             'LIGHT MANIPULATION
         CASE "#" 'Shade
             Cell.C.L = RGB32(RED32(Cell.C.L) / 2, GREEN32(Cell.C.L) / 2, BLUE32(Cell.C.L) / 2)
@@ -144,12 +154,18 @@ SUB CheckCell (Cell AS Cell)
             Cell.C.D = RGB32(RED32(Cell.C.D) / 2, GREEN32(Cell.C.D) / 2, BLUE32(Cell.C.D) / 2)
 
 
-        CASE "@" 'Diffuser: Distribute average color
-                CALL DistColor(Cell.C, RGB32( _
-                    (RED32(Cell.C.L) + RED32(Cell.C.R) + RED32(Cell.C.U) + RED32(Cell.C.D)) / 4, _
-                    (GREEN32(Cell.C.L) + GREEN32(Cell.C.R) + GREEN32(Cell.C.U) + GREEN32(Cell.C.D)) / 4, _
-                    (BLUE32(Cell.C.L) + BLUE32(Cell.C.R) + BLUE32(Cell.C.U) + BLUE32(Cell.C.D)) / 4) _
-                )
+            'CASE "@" 'Diffuser: Distribute average color
+            '        CALL DistColor(Cell.C, RGB32( _
+            '            (RED32(Cell.C.L) + RED32(Cell.C.R) + RED32(Cell.C.U) + RED32(Cell.C.D)) / 4, _
+            '            (GREEN32(Cell.C.L) + GREEN32(Cell.C.R) + GREEN32(Cell.C.U) + GREEN32(Cell.C.D)) / 4, _
+            '            (BLUE32(Cell.C.L) + BLUE32(Cell.C.R) + BLUE32(Cell.C.U) + BLUE32(Cell.C.D)) / 4) _
+            '        )
+        CASE "@" 'reflector
+            NewC.L = Cell.C.R
+            NewC.R = Cell.C.L
+            NewC.U = Cell.C.D
+            NewC.D = Cell.C.U
+            Cell.C = NewC
 
         CASE "{" 'solar panel
             w~& = (RED32(Cell.C.L) + GREEN32(Cell.C.L) + BLUE32(Cell.C.L)) / 3
@@ -221,7 +237,7 @@ END SUB
 
 
 FUNCTION Merge~& (C AS Colors)
-    Merge = RGB32(RED32(C.L) + RED32(C.R) + RED32(C.U) + RED32(C.D), GREEN32(C.L) + GREEN32(C.R) + GREEN32(C.U) + GREEN32(C.D), BLUE32(C.L) + BLUE32(C.R) + BLUE32(C.U) + BLUE32(C.D))
+    Merge = RGB32(RED32(C.L) + RED32(C.R) + RED32(C.U) + RED32(C.D), GREEN32(C.L) + GREEN32(C.R) + GREEN32(C.U) + GREEN32(C.D), BLUE32(C.L) + BLUE32(C.R) + BLUE32(C.U) + BLUE32(C.D)) AND &H00FFFFFF~&
     'C.L = 0: C.R = 0: C.U = 0: C.D = 0
 END FUNCTION
 
@@ -236,6 +252,7 @@ FUNCTION Filter~& (IC~&, FC~&)
 END FUNCTION
 
 SUB DistColor (C AS Colors, C~&)
+    C~& = C~& AND &H00FFFFFF~&
     DIM M~&
     M~& = RGB32(_
         RED32(C.L) + RED32(C.R) + RED32(C.U) + RED32(C.D) + RED32(C~&),_
