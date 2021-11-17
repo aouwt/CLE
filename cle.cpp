@@ -152,7 +152,7 @@ void cell::runcell (void) {
 
 
 void updatebeams (void) {
-	struct beams newboard [board.width] [board.height] = {0};
+	struct beams newboard [board.width] [board.height];
 	
 	unsigned int x, y;
 	
@@ -200,7 +200,7 @@ void loadboard (FILE* f) {
 	for (y = 0; y != 1024; y++) {
 		for (x = 0; x != 1024; x++) {
 			
-			char c = fgetc (f);
+			int c = fgetc (f);
 			if (c == EOF)
 				goto next;
 			else if (c == '\n')
