@@ -189,6 +189,8 @@ void loadboard (FILE* f) {
 			board.board[x][y] = tempboard[x][y];
 		}
 	}
+	
+	board.width = w; board.height = h;
 
 	delete[] tempboard;
 }
@@ -210,17 +212,19 @@ void updatewindow (void) {
 			windowbuf[get_index(1,2)] = board.board[x][y].beam.d << 8;
 		}
 	}
-	#undef get_index(px,py)
-	if (mfb_update(window, windowbuf) < 0); // panic here
+	#undef get_index
+	if (mfb_update(window, windowbuf) < 0) printf ("uh-oh"); // panic here
 }
 
 int main () {
-	//struct mfb_window *window = mfb_open ("CLEc", 800, 600);
 	FILE* f = fopen ("test.txt", "r");
 	loadboard (f);
 	fclose (f);
+	setupwindow ();
 
 	while (true) {
 		updatebeams ();
+		tick ();
+		updatewindow ();
 	}
 }
