@@ -13,7 +13,7 @@ color filter (color bcolor, color fcolor) {
 	if (gg (fcolor) > max) max = gg (fcolor);
 	if (gb (fcolor) > max) max = gb (fcolor);
 	if (!max) return 0;
-	
+
 	return rgb (
 		gr(bcolor) * (gr(fcolor) / max),
 		gg(bcolor) * (gg(fcolor) / max),
@@ -42,7 +42,7 @@ void cell::runcell (void) {
 		case 'Y': beam = {YELLOW}; break;
 		case 'C': beam = {CYAN}; break;
 		case 'M': beam = {MAGENTA}; break;
-		
+
 		case 'r': beam = {RED}; op = '\0'; break;
 		case 'g': beam = {GREEN}; op = '\0'; break;
 		case 'b': beam = {BLUE}; op = '\0'; break;
@@ -50,14 +50,14 @@ void cell::runcell (void) {
 		case 'y': beam = {YELLOW}; op = '\0'; break;
 		case 'c': beam = {CYAN}; op = '\0'; break;
 		case 'm': beam = {MAGENTA}; op = '\0'; break;
-		
+
 		case '?':
 			if (state)
 				beam = {state};
 			else
 				state = merge (beam);
 			break;
-		
+
 		case '#':
 			beam = {
 				rgb (gr(beam.l) / 2, gg(beam.l) / 2, gb(beam.l) / 2),
@@ -65,11 +65,11 @@ void cell::runcell (void) {
 				rgb (gr(beam.u) / 2, gg(beam.u) / 2, gb(beam.u) / 2),
 				rgb (gr(beam.d) / 2, gg(beam.d) / 2, gb(beam.d) / 2)
 			}; break;
-		
+
 		case '@':
 			beam = {beam.r, beam.l, beam.d, beam.u};
 			break;
-		
+
 		case '{': {
 				unsigned char avg = (gr(beam.l) + gg(beam.l) + gb(beam.l)) / 3;
 				beam.l = rgb (avg, avg, avg);
@@ -80,34 +80,34 @@ void cell::runcell (void) {
 				beam.r = rgb (avg, avg, avg);
 				beam.u = beam.d = beam.l = 0;
 			} break;
-		
+
 		case '<': beam.l = merge (beam); break;
 		case '>': beam.r = merge (beam); break;
 		case '^': beam.u = merge (beam); break;
 		case 'v': beam.d = merge (beam); break;
-		
+
 		case '(': if (beam.l) { beam.r = beam.l; beam.l = 0; } break;
 		case ')': if (beam.r) { beam.l = beam.r; beam.r = 0; } break;
-		
+
 		case'\\': beam = {beam.u, beam.d, beam.l, beam.r}; break;
 		case '/': beam = {beam.d, beam.u, beam.r, beam.l}; break;
-		
+
 		case '|': beam.l = beam.r = 0; break;
 		case '-': beam.u = beam.d = 0; break;
-		
+
 		case ' ': {
 				color hc, vc;
-				
+
 				if (beam.l && beam.r)
 					beam.l = beam.r = hc = merge ({beam.l, beam.r, 0, 0});
 				else
 					hc = beam.r | beam.l;
-				
+
 				if (beam.u && beam.d)
 					beam.u = beam.d = vc = merge ({beam.u, beam.d, 0, 0});
 				else
 					vc = beam.u | beam.d;
-				
+
 				if (hc && vc) beam = {
 						filter (beam.l, vc),
 						filter (beam.r, vc),
@@ -115,7 +115,7 @@ void cell::runcell (void) {
 						filter (beam.d, hc)
 					};
 			}; break;
-		
+
 		default: op = ' ';
 	}
 }
@@ -124,15 +124,15 @@ void cell::runcell (void) {
 
 void updatebeams (void) {
 	struct beams newboard [board.width] [board.height];
-	
+
 	unsigned int x, y;
-	
+
 	// clear the board and transfer to new array
 	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
 		newboard[x][y] = board.board[x][y].beam;
 		board.board[x][y].beam = {0};
 	}	}
-	
+
 	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
 		if (x != board.width-1) board.board[x][y].beam.l = newboard[x+1][y].l;
 		if (y != board.height-1) board.board[x][y].beam.r = newboard[x][y+1].r;
@@ -153,10 +153,10 @@ void tick (void) {
 
 void initboard (unsigned int width, unsigned int height) {
 	board.board = new class cell*[width];
-	
+
 	for(unsigned int i = 0; i < width; ++i)
 		board.board[i] = new class cell[height];
-	
+
 	board.width = width; board.height = height;
 }
 
@@ -166,21 +166,21 @@ void cleanup (void) {
 
 void loadboard (FILE* f) {
 	auto tempboard = new class cell [1024] [1024];
-	
+
 	unsigned int x, y;
 	for (y = 0; y != 1024; y++) {
 		for (x = 0; x != 1024; x++) {
-			
+
 			int c = fgetc (f);
 			if (c == EOF)
 				goto next;
 			else if (c == '\n')
 				break;
 			else tempboard[x][y].op = c;
-			
+
 		}
 	}
-	
+
 	next:;
 	unsigned int w = x, h = y;
 	initboard (w, h);
@@ -189,7 +189,7 @@ void loadboard (FILE* f) {
 			board.board[x][y] = tempboard[x][y];
 		}
 	}
-	
+
 	delete[] tempboard;
 }
 
@@ -202,7 +202,8 @@ void updatewindow (void) {
 	unsigned int x, y;
 	for (y = 0; y != board.height; y++) {
 		for (x = 0; x != board.width; x++) {
-			(x*2) + (y*board.width*2
+			unsigned long i = (x*2) + (y*board.width*2);
+			
 	if (mfb_update(window, windowbuf) < 0); // panic here
 }
 
@@ -211,7 +212,7 @@ int main () {
 	FILE* f = fopen ("test.txt", "r");
 	loadboard (f);
 	fclose (f);
-	
+
 	while (true) {
 		updatebeams ();
 	}
