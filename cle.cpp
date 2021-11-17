@@ -7,12 +7,12 @@
 #define WHITE 0xFFFFFF
 #define BLACK 0x000000
 
+typedef unsigned long color;
+struct beams {
+	color u, d, l, r = {0};
+};
 class cell {
 	public:
-		typedef unsigned long color;
-		struct beams {
-			color u, d, l, r = {0};
-		};
 		struct beams beam = {0};
 		color state = 0;
 		char op = '\0';
@@ -20,15 +20,15 @@ class cell {
 		void runcell (void);
 		
 	private:
-		color filter (color bcolor, color fcolor);
+		/*color filter (color bcolor, color fcolor);
 		unsigned char gr (color color);
 		unsigned char gg (color color);
 		unsigned char gb (color color);
 		color rgb (unsigned char r, unsigned char g, unsigned char b);
-		color merge (struct beams colors);
+		color merge (struct beams colors);*/
 };
 
-color cell::filter (color bcolor, color fcolor) {
+color filter (color bcolor, color fcolor) {
 	if (!bcolor) return;
 	unsigned char max = gr (fcolor);
 	if (gg (fcolor) > max) max = gg (fcolor);
@@ -42,7 +42,7 @@ color cell::filter (color bcolor, color fcolor) {
 	);
 }
 
-color cell::merge (struct beams colors) {
+color merge (struct beams colors) {
 	unsigned int
 		r = gr(colors.l) + gr(colors.r) + gr(colors.u) + gr(colors.d),
 		g = gg(colors.l) + gg(colors.r) + gg(colors.u) + gg(colors.d),
@@ -53,11 +53,11 @@ color cell::merge (struct beams colors) {
 	return rgb (r,g,b);
 }
 
-color cell:rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
+color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
 
-color cell:gr (color color) { return (color & 0xFF0000) >> 16; }
-color cell:gg (color color) { return (color & 0x00FF00) >> 8; }
-color cell:gb (color color) { return (color & 0x0000FF); }
+color gr (color color) { return (color & 0xFF0000) >> 16; }
+color gg (color color) { return (color & 0x00FF00) >> 8; }
+color gb (color color) { return (color & 0x0000FF); }
 
 void cell::runcell (void) {
 	switch (op) {
@@ -144,6 +144,27 @@ void cell::runcell (void) {
 		
 		default: op = ' ';
 	}
+}
+
+
+
+void updatebeams (void) {
+	struct beams newboard [board.width] [board.height] = {0};
+	
+	unsigned int x, y;
+	
+	// clear the board and transfer to new array
+	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
+		newboard[x][y] = board.board[x][y];
+		board.board[x][y] = {0};
+	}	}
+	
+	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
+		if (x != board.width-1) board.board[x][y].l = newboard[x+1][y].l;
+		if (y != board.height-1) board.board[x][y].r = newboard[x][y+1].r;
+		if (x) board.board[x][y].r = newboard[x-1][y].r;
+		if (y) board.board[x][y].d = newboard[x][y-1].d;
+	}	}
 }
 
 
