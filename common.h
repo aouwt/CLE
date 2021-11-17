@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "mfb/include/MiniFB.h"
 
 #define RED 0xFF0000
 #define GREEN 0x00FF00
@@ -25,7 +26,9 @@ class cell {
 		struct beams beam = {0};
 		color state = 0;
 		char op = '\0';
-		
+
 		void runcell (void);
 };
 
+struct mfb_window window*;
+uint32_t* windowbuf;

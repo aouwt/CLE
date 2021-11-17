@@ -1,3 +1,5 @@
+#include "common.h"
+
 color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
 
 color gr (color color) { return (color & 0xFF0000) >> 16; }
@@ -189,6 +191,19 @@ void loadboard (FILE* f) {
 	}
 	
 	delete[] tempboard;
+}
+
+void setupwindow (void) {
+	window = mfb_open ("CLE", board.width * 2, board.height * 2);
+	windowbuf = new uint32_t [board.width * board.height * 4];
+}
+
+void updatewindow (void) {
+	unsigned int x, y;
+	for (y = 0; y != board.height; y++) {
+		for (x = 0; x != board.width; x++) {
+			(x*2) + (y*board.width*2
+	if (mfb_update(window, windowbuf) < 0); // panic here
 }
 
 int main () {
