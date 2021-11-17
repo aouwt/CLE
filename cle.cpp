@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #define RED 0xFF0000
 #define GREEN 0x00FF00
 #define BLUE 0x0000FF
@@ -12,7 +14,7 @@ struct beams {
 	color u, d, l, r = {0};
 };
 struct board {
-	cell board[][];
+	class cell** board;
 	unsigned int width;
 	unsigned int height;
 };
@@ -25,27 +27,25 @@ class cell {
 		char op = '\0';
 		
 		void runcell (void);
-		
-	private:
-		/*color filter (color bcolor, color fcolor);
-		unsigned char gr (color color);
-		unsigned char gg (color color);
-		unsigned char gb (color color);
-		color rgb (unsigned char r, unsigned char g, unsigned char b);
-		color merge (struct beams colors);*/
 };
+
+color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
+
+color gr (color color) { return (color & 0xFF0000) >> 16; }
+color gg (color color) { return (color & 0x00FF00) >> 8; }
+color gb (color color) { return (color & 0x0000FF); }
 
 
 color filter (color bcolor, color fcolor) {
-	if (!bcolor) return;
+	if (!bcolor) return 0;
 	unsigned char max = gr (fcolor);
 	if (gg (fcolor) > max) max = gg (fcolor);
 	if (gb (fcolor) > max) max = gb (fcolor);
-	if (!max) return;
+	if (!max) return 0;
 	
 	return rgb (
 		gr(bcolor) * (gr(fcolor) / max),
-		gg(bcolor) * (ggfcolor) / max),
+		gg(bcolor) * (gg(fcolor) / max),
 		gb(bcolor) * (gb(fcolor) / max)
 	);
 }
@@ -61,11 +61,6 @@ color merge (struct beams colors) {
 	return rgb (r,g,b);
 }
 
-color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
-
-color gr (color color) { return (color & 0xFF0000) >> 16; }
-color gg (color color) { return (color & 0x00FF00) >> 8; }
-color gb (color color) { return (color & 0x0000FF); }
 
 void cell::runcell (void) {
 	switch (op) {
@@ -87,7 +82,7 @@ void cell::runcell (void) {
 		
 		case '?':
 			if (state)
-				distcolor (state);
+				beam = {state};
 			else
 				state = merge (beam);
 			break;
@@ -129,7 +124,7 @@ void cell::runcell (void) {
 		case '|': beam.l = beam.r = 0; break;
 		case '-': beam.u = beam.d = 0; break;
 		
-		case ' ': if (beam) {
+		case ' ': {
 				color hc, vc;
 				
 				if (beam.l && beam.r)
@@ -163,7 +158,7 @@ void updatebeams (void) {
 	
 	// clear the board and transfer to new array
 	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
-		newboard[x][y] = board.board.beam[x][y];
+		newboard[x][y] = board.board[x][y].beam;
 		board.board[x][y].beam = {0};
 	}	}
 	
@@ -175,18 +170,65 @@ void updatebeams (void) {
 	}	}
 }
 
+void tick (void) {
+	updatebeams ();
+	unsigned int x, y;
+	for (y = 0; y != board.height; y++) {
+		for (x = 0; x != board.width; x++)
+			board.board[x][y].runcell ();
+	}
+}
+
 
 void initboard (unsigned int width, unsigned int height) {
-	board.board = new cell [width] [height];
+	board.board = new class cell*[width];
+	
+	for(unsigned int i = 0; i < width; ++i)
+		board.board[i] = new class cell[height];
+	
 	board.width = width; board.height = height;
 }
 
 void cleanup (void) {
-	delete[] board.board;
+	delete[] board.board; // does this delete everything or...?
 }
 
-
-void main () {
-	//struct mfb_window *window = mfb_open ("CLEc", 800, 600);
+void loadboard (FILE* f) {
+	auto tempboard = new class cell [1024] [1024];
 	
+	unsigned int x, y;
+	for (y = 0; y != 1024; y++) {
+		for (x = 0; x != 1024; x++) {
+			
+			char c = fgetc (f);
+			if (c == EOF)
+				goto next;
+			else if (c == '\n')
+				break;
+			else tempboard[x][y].op = c;
+			
+		}
+	}
+	
+	next:;
+	unsigned int w = x, h = y;
+	initboard (w, h);
+	for (y = 0; y != h; y++) {
+		for (x = 0; x != w; x++) {
+			board.board[x][y] = tempboard[x][y];
+		}
+	}
+	
+	delete[] tempboard;
+}
+
+int main () {
+	//struct mfb_window *window = mfb_open ("CLEc", 800, 600);
+	FILE* f = fopen ("test.txt", "r");
+	loadboard (f);
+	fclose (f);
+	
+	while (true) {
+		updatebeams ();
+	}
 }
