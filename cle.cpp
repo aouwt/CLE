@@ -11,6 +11,13 @@ typedef unsigned long color;
 struct beams {
 	color u, d, l, r = {0};
 };
+struct board {
+	cell board[][];
+	unsigned int width;
+	unsigned int height;
+};
+struct board board;
+
 class cell {
 	public:
 		struct beams beam = {0};
@@ -27,6 +34,7 @@ class cell {
 		color rgb (unsigned char r, unsigned char g, unsigned char b);
 		color merge (struct beams colors);*/
 };
+
 
 color filter (color bcolor, color fcolor) {
 	if (!bcolor) return;
@@ -155,16 +163,26 @@ void updatebeams (void) {
 	
 	// clear the board and transfer to new array
 	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
-		newboard[x][y] = board.board[x][y];
-		board.board[x][y] = {0};
+		newboard[x][y] = board.board.beam[x][y];
+		board.board[x][y].beam = {0};
 	}	}
 	
 	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
-		if (x != board.width-1) board.board[x][y].l = newboard[x+1][y].l;
-		if (y != board.height-1) board.board[x][y].r = newboard[x][y+1].r;
-		if (x) board.board[x][y].r = newboard[x-1][y].r;
-		if (y) board.board[x][y].d = newboard[x][y-1].d;
+		if (x != board.width-1) board.board[x][y].beam.l = newboard[x+1][y].l;
+		if (y != board.height-1) board.board[x][y].beam.r = newboard[x][y+1].r;
+		if (x) board.board[x][y].beam.r = newboard[x-1][y].r;
+		if (y) board.board[x][y].beam.d = newboard[x][y-1].d;
 	}	}
+}
+
+
+void initboard (unsigned int width, unsigned int height) {
+	board.board = new cell [width] [height];
+	board.width = width; board.height = height;
+}
+
+void cleanup (void) {
+	delete[] board.board;
 }
 
 
