@@ -189,7 +189,7 @@ void loadboard (FILE* f) {
 			board.board[x][y] = tempboard[x][y];
 		}
 	}
-	
+
 	board.width = w; board.height = h;
 
 	delete[] tempboard;
@@ -213,7 +213,10 @@ void updatewindow (void) {
 		}
 	}
 	#undef get_index
-	if (mfb_update(window, windowbuf) < 0) printf ("uh-oh"); // panic here
+	if (mfb_update(window, windowbuf) < 0) {
+		printf ("X11 being fucky again\n");
+		exit (1);
+	}
 }
 
 int main () {
