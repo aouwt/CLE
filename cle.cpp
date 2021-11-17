@@ -194,16 +194,23 @@ void loadboard (FILE* f) {
 }
 
 void setupwindow (void) {
-	window = mfb_open ("CLE", board.width * 2, board.height * 2);
-	windowbuf = new uint32_t [board.width * board.height * 4];
+	window = mfb_open ("CLE", board.width * 3, board.height * 3);
+	windowbuf = new uint32_t [board.width * board.height * 3 * 3];
 }
 
 void updatewindow (void) {
+	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * board.width)
 	unsigned int x, y;
 	for (y = 0; y != board.height; y++) {
 		for (x = 0; x != board.width; x++) {
-			unsigned long i = (x*2) + (y*board.width*2);
-			
+			windowbuf[get_index(1,1)] = board.board[x][y].state << 8;
+			windowbuf[get_index(0,1)] = board.board[x][y].beam.l << 8;
+			windowbuf[get_index(2,1)] = board.board[x][y].beam.r << 8;
+			windowbuf[get_index(1,0)] = board.board[x][y].beam.u << 8;
+			windowbuf[get_index(1,2)] = board.board[x][y].beam.d << 8;
+		}
+	}
+	#undef get_index(px,py)
 	if (mfb_update(window, windowbuf) < 0); // panic here
 }
 

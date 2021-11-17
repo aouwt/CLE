@@ -30,5 +30,5 @@ class cell {
 		void runcell (void);
 };
 
-struct mfb_window window*;
+struct mfb_window* window;
 uint32_t* windowbuf;
