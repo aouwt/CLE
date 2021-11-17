@@ -6,5 +6,5 @@ cmake .
 make minifb
 cd ..
 echo "Building CLE..."
-c++ cle.cpp -lGL -lX11 -L./mfb -lminifb
+c++ cle.cpp -lGL -lX11 -L./mfb -lminifb $(pkg-config x11 gl --libs --cflags)
 echo "Done."
