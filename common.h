@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <SDL2/SDL2.h>
+#include <SDL2/SDL.h>
 
 #define RED 0xFF0000
 #define GREEN 0x00FF00

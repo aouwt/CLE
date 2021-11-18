@@ -193,7 +193,7 @@ void loadboard (FILE* f) {
 	board.width = ++w; board.height = ++h;
 }
 
-int setupwindow (void) {
+char setupwindow (void) {
 	/*window = mfb_open ("CLE", board.width * 3, board.height * 3);
 	windowbuf = new uint32_t [board.width * board.height * 3 * 3];*/
 	if (SDL_Init (SDL_INIT_VIDEO) < 0) return SDL_GetError ();
@@ -207,6 +207,12 @@ int setupwindow (void) {
 	WindowSurface = SDL_GetWindowSurface (Window);
 	return 0;
 }
+
+void stopsdl (void) {
+	SDL_FreeSurface (WindowSurface);
+	SDL_DestroyWindow (Window);
+}
+
 
 void updatewindow (void) {
 	if (! mfb_wait_sync (window)) return;
