@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "mfb/include/MiniFB.h"
+#include <SDL2/SDL2.h>
 
 #define RED 0xFF0000
 #define GREEN 0x00FF00
@@ -30,5 +30,6 @@ class cell {
 		void runcell (void);
 };
 
-struct mfb_window* window;
-uint32_t* windowbuf;
+SDL_Window* Window;
+SDL_Surface* WindowSurface;
+SDL_Surface* PixLayer;

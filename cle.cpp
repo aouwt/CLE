@@ -193,9 +193,19 @@ void loadboard (FILE* f) {
 	board.width = ++w; board.height = ++h;
 }
 
-void setupwindow (void) {
-	window = mfb_open ("CLE", board.width * 3, board.height * 3);
-	windowbuf = new uint32_t [board.width * board.height * 3 * 3];
+int setupwindow (void) {
+	/*window = mfb_open ("CLE", board.width * 3, board.height * 3);
+	windowbuf = new uint32_t [board.width * board.height * 3 * 3];*/
+	if (SDL_Init (SDL_INIT_VIDEO) < 0) return SDL_GetError ();
+	Window = SDL_CreateWindow (
+		"CLE",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		800, 600,
+		SDL_WINDOW_SHOWN
+	);
+	if (Window == NULL) return SDL_GetError ();
+	WindowSurface = SDL_GetWindowSurface (Window);
+	return 0;
 }
 
 void updatewindow (void) {
