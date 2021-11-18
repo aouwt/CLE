@@ -196,7 +196,7 @@ void loadboard (FILE* f) {
 }
 
 void setupwindow (void) {
-	window = mfb_open ("CLE", board.width * 3, board.height * 3);
+	window = mfb_open ("CLE", 800, 600);
 	windowbuf = new uint32_t [board.width * board.height * 3 * 3];
 }
 
@@ -213,7 +213,7 @@ void updatewindow (void) {
 		}
 	}
 	#undef get_index
-	if (mfb_update(window, windowbuf) < 0) {
+	if (mfb_update(window, &windowbuf) < 0) {
 		printf ("X11 being fucky again\n");
 		exit (1);
 	}
