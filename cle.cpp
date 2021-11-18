@@ -196,11 +196,12 @@ void loadboard (FILE* f) {
 }
 
 void setupwindow (void) {
-	window = mfb_open ("CLE", 800, 600);
+	window = mfb_open ("CLE", board.width * 3, board.height * 3);
 	windowbuf = new uint32_t [board.width * board.height * 3 * 3];
 }
 
 void updatewindow (void) {
+	if (! mfb_wait_sync (window)) return;
 	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * board.width)
 	unsigned int x, y;
 	for (y = 0; y != board.height; y++) {
