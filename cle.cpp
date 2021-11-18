@@ -152,10 +152,10 @@ void tick (void) {
 
 
 void initboard (unsigned int width, unsigned int height) {
-	board.board = new class cell*[width];
+	board.board = new class cell* [width+1];
 
-	for(unsigned int i = 0; i < width; ++i)
-		board.board[i] = new class cell[height];
+	for(unsigned int i = 0; i < width+1; ++i)
+		board.board[i] = new class cell [height+1];
 
 	board.width = width; board.height = height;
 }
@@ -165,7 +165,7 @@ void cleanup (void) {
 }
 
 void loadboard (FILE* f) {
-	auto tempboard = new class cell [1024] [1024];
+	char tempboard[1024][1024] = {0};
 
 	unsigned int x, y;
 	for (y = 0; y != 1024; y++) {
@@ -176,7 +176,7 @@ void loadboard (FILE* f) {
 				goto next;
 			else if (c == '\n')
 				break;
-			else tempboard[x][y].op = c;
+			else tempboard[x][y] = c;
 
 		}
 	}
@@ -186,13 +186,11 @@ void loadboard (FILE* f) {
 	initboard (w, h);
 	for (y = 0; y != h; y++) {
 		for (x = 0; x != w; x++) {
-			board.board[x][y] = tempboard[x][y];
+			board.board[x][y].op = tempboard[x][y];
 		}
 	}
 
-	board.width = w; board.height = h;
-
-	delete[] tempboard;
+	board.width = ++w; board.height = ++h;
 }
 
 void setupwindow (void) {
@@ -214,7 +212,7 @@ void updatewindow (void) {
 		}
 	}
 	#undef get_index
-	if (mfb_update(window, &windowbuf) < 0) {
+	if (mfb_update(window, windowbuf) < 0) {
 		printf ("X11 being fucky again\n");
 		exit (1);
 	}
@@ -230,5 +228,6 @@ int main () {
 		updatebeams ();
 		tick ();
 		updatewindow ();
+		getchar ();
 	}
 }
