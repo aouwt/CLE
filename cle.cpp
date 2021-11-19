@@ -206,6 +206,23 @@ void loadboard (FILE* f) {
 
 
 
+void rendertext (void) {
+	SDL_FreeSurface (TextSurface);
+	
+	SDL_Surface tempsurf;
+	unsigned int x, y;
+	for (y = 0; y != Board.height; y++) {
+		for (x = 0; x != Board.width; x++) {
+		
+			char op = Board.board[x][y].op;
+			if (op < 
+			TextSurface = TTF_RenderText_Solid (Font, );
+			
+		}
+	}
+}
+
+
 char setupwindow (void) {
 	// SDL initialize
 	if (SDL_Init (SDL_INIT_VIDEO) < 0) return SDL_GetError ();
