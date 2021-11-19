@@ -210,13 +210,26 @@ void rendertext (void) {
 	SDL_FreeSurface (TextSurface);
 	
 	SDL_Surface tempsurf;
+	
 	unsigned int x, y;
+	unsigned char
+		fw = TextSurface.w / Board.width,
+		fh = TextSurface.h / Board.height;
+		
 	for (y = 0; y != Board.height; y++) {
 		for (x = 0; x != Board.width; x++) {
 		
 			char op = Board.board[x][y].op;
-			if (op < 
-			TextSurface = TTF_RenderText_Solid (Font, );
+			if (op <= 32) continue;
+			
+			tempsurf = TTF_RenderText_Solid (Font, { op, 0 });
+			
+			SDL_BlitScaled (
+				tempsurf, NULL,
+				TextSurface, { x*fw,y*fh, fw,fh }
+			);
+			
+			SDL_FreeSurface (tempsurf);
 			
 		}
 	}
