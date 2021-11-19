@@ -249,6 +249,8 @@ void rendertext (void) {
 			
 			tempsurf = TTF_RenderText_Solid (Font, op, { 0xFF, 0xFF, 0xFF, 0xFF });
 			
+			TTFERR (tempsurf == NULL, EM_CREATESURFACE);
+			
 			SDL_BlitScaled (
 				tempsurf, NULL,
 				TextSurface, &rect
@@ -267,9 +269,11 @@ void resizewindow (void) {
 		w = Event.window.data1,
 		h = Event.window.data2;
 		
-	SDL_FreeSurface (TextSurface); 
+	SDL_FreeSurface (TextSurface);
+	
 	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, 0,0,0,0);
-	if (TextSurface == NULL) exit(10);//exit ((int)SDL_GetError ());
+	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
+	
 	UpdateTextSurface = true;
 	
 	SDL_SetWindowSize (Window, w, h);
@@ -277,10 +281,10 @@ void resizewindow (void) {
 }
 
 
-char setupwindow (void) {
+void setupwindow (void) {
 	// SDL initialize
-	if (SDL_Init (SDL_INIT_VIDEO) < 0) return 1;//SDL_GetError ();
-	if (TTF_Init () < 0) return 2;//TTF_GetError ();
+	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL!");
+	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf!");
 	
 	// Window initialize
 	Window = SDL_CreateWindow (
@@ -289,17 +293,18 @@ char setupwindow (void) {
 		800, 600,
 		SDL_WINDOW_RESIZABLE
 	);
+	SDLERR (Window == NULL, "Could not create window!");
 	
-	if (Window == NULL) return 3;//SDL_GetError ();
 	// surface
 	WindowSurface = SDL_GetWindowSurface (Window);
+	SDLERR (WindowSurface == NULL, "Could not retrieve window surface!");
+	
 	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
+	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
 	// TTF
-	Font = TTF_OpenFont ("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16); //("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);
-	if (Font == NULL) return 4; //TTF_GetError ();
-	
-	return 0;
+	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
+	TTFERR (Font == NULL, "Could not load font!");
 }
 
 
@@ -374,8 +379,8 @@ void updatewindow (void) {
 
 
 
-int main (char* args[], char argcount) {
-
+int main (int argcount, char* args[]) {
+	/*char* file;
 	// argument parser
 	for (unsigned char i = 0; i != argcount; i++) {
 
@@ -390,22 +395,28 @@ int main (char* args[], char argcount) {
 			switch (arg) {
 			}
 
+		} else {
+			// assume its a file
+			file = args[i];
 		}
 
+	}*/
+
+	char file[] = "./test.txt";
+	//load file
+	{
+		FILE* f = fopen (file, "r");
+		THISERR (f == NULL, "Could not open file!", ENOENT);
+		loadboard (f);
+		fclose (f);
 	}
-
-
 	
-	FILE* f = fopen ("test.txt", "r");
-	loadboard (f);
-	fclose (f);
-	if (setupwindow ()) return 20;
-	//return setupwindow();
+	setupwindow ();
+	
 	while (true) {
-		//updatebeams ();
-		//tick ();
+		tick ();
 		updatewindow ();
 		//getchar ();
-		SDL_Delay (100);
+		//SDL_Delay (100);
 	}
 }
