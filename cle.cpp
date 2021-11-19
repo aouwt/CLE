@@ -374,7 +374,28 @@ void updatewindow (void) {
 
 
 
-int main () {
+int main (char* args[], char argcount) {
+
+	// argument parser
+	for (unsigned char i = 0; i != argcount; i++) {
+
+		if (args[i][0] == '-') {
+			char arg = args[i][1];
+
+			if (arg == '-') {
+				char* a = args[i];
+				// alias system here
+			}
+
+			switch (arg) {
+			}
+
+		}
+
+	}
+
+
+	
 	FILE* f = fopen ("test.txt", "r");
 	loadboard (f);
 	fclose (f);
@@ -385,6 +406,6 @@ int main () {
 		//tick ();
 		updatewindow ();
 		//getchar ();
-		SDL_Wait (100);
+		SDL_Delay (100);
 	}
 }
