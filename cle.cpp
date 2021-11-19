@@ -8,7 +8,9 @@ color gb (color color) { return (color & 0x0000FF); }
 
 
 color filter (color bcolor, color fcolor) {
+
 	if (!bcolor) return 0;
+	
 	unsigned char max = gr (fcolor);
 	if (gg (fcolor) > max) max = gg (fcolor);
 	if (gb (fcolor) > max) max = gb (fcolor);
@@ -26,9 +28,11 @@ color merge (struct beams colors) {
 		r = gr(colors.l) + gr(colors.r) + gr(colors.u) + gr(colors.d),
 		g = gg(colors.l) + gg(colors.r) + gg(colors.u) + gg(colors.d),
 		b = gb(colors.l) + gb(colors.r) + gb(colors.u) + gb(colors.d);
+		
 	if (r > 255) r = 255;
 	if (g > 255) g = 255;
 	if (b > 255) b = 255;
+	
 	return rgb (r,g,b);
 }
 
@@ -123,46 +127,53 @@ void cell::runcell (void) {
 
 
 void updatebeams (void) {
-	struct beams newboard [board.width] [board.height];
+	struct beams newboard [Board.width] [Board.height];
 
 	unsigned int x, y;
 
 	// clear the board and transfer to new array
-	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
-		newboard[x][y] = board.board[x][y].beam;
-		board.board[x][y].beam = {0};
+	for (x = 0; x != Board.width; x++) {	for (y = 0; y != Board.height; y++) {
+		newboard[x][y] = Board.board[x][y].beam;
+		Board.board[x][y].beam = {0};
 	}	}
 
-	for (x = 0; x != board.width; x++) {	for (y = 0; y != board.height; y++) {
-		if (x != board.width-1) board.board[x][y].beam.l = newboard[x+1][y].l;
-		if (y != board.height-1) board.board[x][y].beam.r = newboard[x][y+1].r;
-		if (x) board.board[x][y].beam.r = newboard[x-1][y].r;
-		if (y) board.board[x][y].beam.d = newboard[x][y-1].d;
+	for (x = 0; x != Board.width; x++) {	for (y = 0; y != Board.height; y++) {
+		if (x != Board.width-1) Board.board[x][y].beam.l = newboard[x+1][y].l;
+		if (y != Board.height-1) Board.board[x][y].beam.r = newboard[x][y+1].r;
+		if (x) Board.board[x][y].beam.r = newboard[x-1][y].r;
+		if (y) Board.board[x][y].beam.d = newboard[x][y-1].d;
 	}	}
 }
+
+
 
 void tick (void) {
 	updatebeams ();
 	unsigned int x, y;
-	for (y = 0; y != board.height; y++) {
-		for (x = 0; x != board.width; x++)
-			board.board[x][y].runcell ();
+	for (y = 0; y != Board.height; y++) {
+		for (x = 0; x != Board.width; x++)
+			Board.board[x][y].runcell ();
 	}
 }
 
 
+
 void initboard (unsigned int width, unsigned int height) {
-	board.board = new class cell* [width+1];
+	Board.board = new class cell* [width+1];
 
-	for(unsigned int i = 0; i < width+1; ++i)
-		board.board[i] = new class cell [height+1];
+	for(unsigned int i = 0; i < width; ++i)
+		Board.board[i] = new class cell [height+1];
 
-	board.width = width; board.height = height;
+	Board.width = width; Board.height = height;
 }
+
+
 
 void cleanup (void) {
-	delete[] board.board; // does this delete everything or...?
+	delete[] Board.board; // does this delete everything or...?
 }
+
+
 
 void loadboard (FILE* f) {
 	char tempboard[1024][1024] = {0};
@@ -186,17 +197,21 @@ void loadboard (FILE* f) {
 	initboard (w, h);
 	for (y = 0; y != h; y++) {
 		for (x = 0; x != w; x++) {
-			board.board[x][y].op = tempboard[x][y];
+			Board.board[x][y].op = tempboard[x][y];
 		}
 	}
 
-	board.width = ++w; board.height = ++h;
+	Board.width = ++w; Board.height = ++h;
 }
 
+
+
 char setupwindow (void) {
-	/*window = mfb_open ("CLE", board.width * 3, board.height * 3);
-	windowbuf = new uint32_t [board.width * board.height * 3 * 3];*/
+	// SDL initialize
 	if (SDL_Init (SDL_INIT_VIDEO) < 0) return SDL_GetError ();
+	if (TTF_Init () < 0) return TTF_GetError ();
+	
+	// Window initialize
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -204,35 +219,73 @@ char setupwindow (void) {
 		SDL_WINDOW_SHOWN
 	);
 	if (Window == NULL) return SDL_GetError ();
+	// surface
 	WindowSurface = SDL_GetWindowSurface (Window);
+	
+	
+	// Renderer (?)
+	/*Renderer = SDL_CreateRenderer (Window, -1, SDL_RENDERER_ACCELERATED);
+	SDL_SetRenderDrawColor (Renderer, 0xFF,0xFF,0xFF,0xFF);*/
+	
+	// TTF
+	Font = TTF_OpenFont ("arbitrary-path-to-font", FONT_SIZE
+	if (Font == NULL) return TTF_GetError ();
+	
 	return 0;
 }
 
+
+
 void stopsdl (void) {
+	// SDL
 	SDL_FreeSurface (WindowSurface);
+	SDL_FreeSurface (BeamsSurface);
+	SDL_FreeSurface (TextSurface);
+	
 	SDL_DestroyWindow (Window);
+	
+	
+	// TTF
+	TTF_CloseFont (Font);
+	
+	
+	// Quit
+	TTF_Quit ();
+	SDL_Quit ();
 }
+
+
+
+void makebeamsurfacethingaaaaaa (void) {
+	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
+	
+		unsigned int x, y;
+		for (y = 0; y != Board.height; y++) {
+			for (x = 0; x != Board.width; x++) {
+			
+				windowbuf[get_index(1,1)] = Board.board[x][y].state << 8;
+				windowbuf[get_index(0,1)] = Board.board[x][y].beam.l << 8;
+				windowbuf[get_index(2,1)] = Board.board[x][y].beam.r << 8;
+				windowbuf[get_index(1,0)] = Board.board[x][y].beam.u << 8;
+				windowbuf[get_index(1,2)] = Board.board[x][y].beam.d << 8;
+				
+			}
+		}
+		
+	#undef get_index
+}
+
 
 
 void updatewindow (void) {
-	if (! mfb_wait_sync (window)) return;
-	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * board.width)
-	unsigned int x, y;
-	for (y = 0; y != board.height; y++) {
-		for (x = 0; x != board.width; x++) {
-			windowbuf[get_index(1,1)] = board.board[x][y].state << 8;
-			windowbuf[get_index(0,1)] = board.board[x][y].beam.l << 8;
-			windowbuf[get_index(2,1)] = board.board[x][y].beam.r << 8;
-			windowbuf[get_index(1,0)] = board.board[x][y].beam.u << 8;
-			windowbuf[get_index(1,2)] = board.board[x][y].beam.d << 8;
-		}
+	if (UpdateTextSurface) {
+		
 	}
-	#undef get_index
-	if (mfb_update(window, windowbuf) < 0) {
-		printf ("X11 being fucky again\n");
-		exit (1);
-	}
+	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, &BeamsStretch);
+	SDL_UpdateWindowSurface (Window);
 }
+
+
 
 int main () {
 	FILE* f = fopen ("test.txt", "r");
