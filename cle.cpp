@@ -269,7 +269,7 @@ void resizewindow (void) {
 		
 	SDL_FreeSurface (TextSurface); 
 	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, 0,0,0,0);
-	if (TextSurface == NULL) exit(1);//exit ((int)SDL_GetError ());
+	if (TextSurface == NULL) exit(10);//exit ((int)SDL_GetError ());
 	UpdateTextSurface = true;
 	
 	SDL_SetWindowSize (Window, w, h);
@@ -280,7 +280,7 @@ void resizewindow (void) {
 char setupwindow (void) {
 	// SDL initialize
 	if (SDL_Init (SDL_INIT_VIDEO) < 0) return 1;//SDL_GetError ();
-	if (TTF_Init () < 0) return 1;//TTF_GetError ();
+	if (TTF_Init () < 0) return 2;//TTF_GetError ();
 	
 	// Window initialize
 	Window = SDL_CreateWindow (
@@ -290,14 +290,14 @@ char setupwindow (void) {
 		SDL_WINDOW_RESIZABLE
 	);
 	
-	if (Window == NULL) return 1;//SDL_GetError ();
+	if (Window == NULL) return 3;//SDL_GetError ();
 	// surface
 	WindowSurface = SDL_GetWindowSurface (Window);
 	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
 	
 	// TTF
-	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);
-	if (Font == NULL) return 1; //TTF_GetError ();
+	Font = TTF_OpenFont ("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16); //("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);
+	if (Font == NULL) return 4; //TTF_GetError ();
 	
 	return 0;
 }
@@ -378,12 +378,13 @@ int main () {
 	FILE* f = fopen ("test.txt", "r");
 	loadboard (f);
 	fclose (f);
-	if (setupwindow ()) return 1;
-
+	if (setupwindow ()) return 20;
+	//return setupwindow();
 	while (true) {
-		updatebeams ();
-		tick ();
+		//updatebeams ();
+		//tick ();
 		updatewindow ();
 		//getchar ();
+		SDL_Wait (100);
 	}
 }

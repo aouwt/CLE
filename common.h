@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_timer.h>
 
 #define RED 0xFF0000
 #define GREEN 0x00FF00
