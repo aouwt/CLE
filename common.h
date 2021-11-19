@@ -11,7 +11,7 @@
 #define WHITE 0xFFFFFF
 #define BLACK 0x000000
 
-#define FONT_SIZE 16
+#define FONT_SIZE 36
 
 typedef unsigned long color;
 
@@ -42,9 +42,11 @@ SDL_Surface* TextSurface;
 
 SDL_Rect BeamsStretch;
 
+SDL_Event Event;
+
 //SDL_Renderer* Renderer;
 
-TTF_Font Font;
+TTF_Font* Font;
 
 struct board Board;
-bool UpdateTextSurface;
+bool UpdateTextSurface = true;

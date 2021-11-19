@@ -47,13 +47,34 @@ void cell::runcell (void) {
 		case 'C': beam = {CYAN}; break;
 		case 'M': beam = {MAGENTA}; break;
 
-		case 'r': beam = {RED}; op = '\0'; break;
-		case 'g': beam = {GREEN}; op = '\0'; break;
-		case 'b': beam = {BLUE}; op = '\0'; break;
-		case 'w': beam = {WHITE}; op = '\0'; break;
-		case 'y': beam = {YELLOW}; op = '\0'; break;
-		case 'c': beam = {CYAN}; op = '\0'; break;
-		case 'm': beam = {MAGENTA}; op = '\0'; break;
+		case 'r': beam = {RED};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'g': beam = {GREEN};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'b': beam = {BLUE}; 
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'w': beam = {WHITE};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'y': beam = {YELLOW};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'c': beam = {CYAN};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
+		case 'm': beam = {MAGENTA};
+			op = '\0';
+			UpdateTextSurface = true;
+			break;
 
 		case '?':
 			if (state)
@@ -120,14 +141,14 @@ void cell::runcell (void) {
 					};
 			}; break;
 
-		default: op = ' ';
+		default: op = ' '; UpdateTextSurface = true; break;
 	}
 }
 
 
 
 void updatebeams (void) {
-	struct beams newboard [Board.width] [Board.height];
+	struct beams newboard [Board.width+1] [Board.height+1];
 
 	unsigned int x, y;
 
@@ -161,7 +182,7 @@ void tick (void) {
 void initboard (unsigned int width, unsigned int height) {
 	Board.board = new class cell* [width+1];
 
-	for(unsigned int i = 0; i < width; ++i)
+	for(unsigned int i = 0; i < width+1; ++i)
 		Board.board[i] = new class cell [height+1];
 
 	Board.width = width; Board.height = height;
@@ -207,59 +228,76 @@ void loadboard (FILE* f) {
 
 
 void rendertext (void) {
-	SDL_FreeSurface (TextSurface);
+	//SDL_FillRect (TextSurface, NULL, 0x00000000);
 	
-	SDL_Surface tempsurf;
+	SDL_Surface* tempsurf;
 	
 	unsigned int x, y;
 	unsigned char
-		fw = TextSurface.w / Board.width,
-		fh = TextSurface.h / Board.height;
-		
+		fw = TextSurface -> w / Board.width,
+		fh = TextSurface -> h / Board.height;
+	
+	SDL_Rect rect = { 0,0, fw, fh };
 	for (y = 0; y != Board.height; y++) {
-		for (x = 0; x != Board.width; x++) {
+		rect.y = fh*y;
 		
-			char op = Board.board[x][y].op;
-			if (op <= 32) continue;
+		for (x = 0; x != Board.width; x++) {
+			rect.x = fw*x;
 			
-			tempsurf = TTF_RenderText_Solid (Font, { op, 0 });
+			const char op[] = { Board.board[x][y].op, 0 };
+			if (op[0] <= 32) continue;
+			
+			tempsurf = TTF_RenderText_Solid (Font, op, { 0xFF, 0xFF, 0xFF, 0xFF });
 			
 			SDL_BlitScaled (
 				tempsurf, NULL,
-				TextSurface, { x*fw,y*fh, fw,fh }
+				TextSurface, &rect
 			);
 			
 			SDL_FreeSurface (tempsurf);
 			
 		}
 	}
+	UpdateTextSurface = false;
+}
+
+
+void resizewindow (void) {
+	unsigned int
+		w = Event.window.data1,
+		h = Event.window.data2;
+		
+	SDL_FreeSurface (TextSurface); 
+	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, 0,0,0,0);
+	if (TextSurface == NULL) exit(1);//exit ((int)SDL_GetError ());
+	UpdateTextSurface = true;
+	
+	SDL_SetWindowSize (Window, w, h);
+	WindowSurface = SDL_GetWindowSurface (Window);
 }
 
 
 char setupwindow (void) {
 	// SDL initialize
-	if (SDL_Init (SDL_INIT_VIDEO) < 0) return SDL_GetError ();
-	if (TTF_Init () < 0) return TTF_GetError ();
+	if (SDL_Init (SDL_INIT_VIDEO) < 0) return 1;//SDL_GetError ();
+	if (TTF_Init () < 0) return 1;//TTF_GetError ();
 	
 	// Window initialize
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 		800, 600,
-		SDL_WINDOW_SHOWN
+		SDL_WINDOW_RESIZABLE
 	);
-	if (Window == NULL) return SDL_GetError ();
+	
+	if (Window == NULL) return 1;//SDL_GetError ();
 	// surface
 	WindowSurface = SDL_GetWindowSurface (Window);
-	
-	
-	// Renderer (?)
-	/*Renderer = SDL_CreateRenderer (Window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_SetRenderDrawColor (Renderer, 0xFF,0xFF,0xFF,0xFF);*/
+	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
 	
 	// TTF
-	Font = TTF_OpenFont ("arbitrary-path-to-font", FONT_SIZE
-	if (Font == NULL) return TTF_GetError ();
+	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);
+	if (Font == NULL) return 1; //TTF_GetError ();
 	
 	return 0;
 }
@@ -285,8 +323,26 @@ void stopsdl (void) {
 }
 
 
+void eventdriver (void) {
+	if (Event.type == SDL_WINDOWEVENT) {
+		
+		switch (Event.window.event) {
+			
+			case SDL_WINDOWEVENT_RESIZED:
+				resizewindow ();
+				
+		}
+		
+	} else if (Event.type == SDL_QUIT) {
+		
+		stopsdl ();
+		exit (0);
+		
+	}
+}
 
-void makebeamsurfacethingaaaaaa (void) {
+
+/*void makebeamsurfacethingaaaaaa (void) {
 	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
 	
 		unsigned int x, y;
@@ -303,15 +359,16 @@ void makebeamsurfacethingaaaaaa (void) {
 		}
 		
 	#undef get_index
-}
+}*/
 
 
 
 void updatewindow (void) {
-	if (UpdateTextSurface) {
-		
-	}
-	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, &BeamsStretch);
+	if (SDL_PollEvent (&Event)) eventdriver ();
+	if (UpdateTextSurface) rendertext ();
+	
+	//SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
+	SDL_BlitScaled (TextSurface, NULL, WindowSurface, NULL);
 	SDL_UpdateWindowSurface (Window);
 }
 
@@ -321,12 +378,12 @@ int main () {
 	FILE* f = fopen ("test.txt", "r");
 	loadboard (f);
 	fclose (f);
-	setupwindow ();
+	if (setupwindow ()) return 1;
 
 	while (true) {
 		updatebeams ();
 		tick ();
 		updatewindow ();
-		getchar ();
+		//getchar ();
 	}
 }
