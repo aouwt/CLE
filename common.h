@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <SDL2/SDL.h>
+#include <string.h>
 #include <SDL2/SDL_ttf.h>
 
 #define RED 0xFF0000
@@ -17,7 +18,8 @@
 #define CHECKERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (E%i,L%i)\n", (msg), (code), __LINE__); exit (1); }
 #define SDLERR(cond,msg) CHECKERR (cond, msg, *SDL_GetError ())
 #define TTFERR(cond,msg) CHECKERR (cond, msg, *TTF_GetError ())
-#define THISERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (L%i)\n", (msg), __LINE__); exit(code); }
+#define THISERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (L%i)\n", (msg), __LINE__); exit (code); }
+#define ARGERR(msg) { fprintf (stderr, "ERROR: %s (L%i)\n", msg, __LINE__); exit (EINVAL); }
 
 const char EM_GENERAL[] = "Unknown error";
 const char EM_CREATESURFACE[] = "Could not create surface";
@@ -28,12 +30,6 @@ struct beams {
 	color u, d, l, r = {0};
 };
 
-struct board {
-	class cell** board;
-	unsigned int width;
-	unsigned int height;
-};
-
 class cell {
 	public:
 		struct beams beam = {0};
@@ -41,6 +37,13 @@ class cell {
 		char op = '\0';
 
 		void runcell (void);
+};
+
+
+struct board {
+	class cell** board;
+	unsigned int width;
+	unsigned int height;
 };
 
 SDL_Window* Window;

@@ -153,17 +153,21 @@ void updatebeams (void) {
 	unsigned int x, y;
 
 	// clear the board and transfer to new array
-	for (x = 0; x != Board.width; x++) {	for (y = 0; y != Board.height; y++) {
-		newboard[x][y] = Board.board[x][y].beam;
-		Board.board[x][y].beam = {0};
-	}	}
+	for (x = 0; x != Board.width; x++) {
+		for (y = 0; y != Board.height; y++) {
+			newboard[x][y] = Board.board[x][y].beam;
+			Board.board[x][y].beam = {0};
+		}
+	}
 
-	for (x = 0; x != Board.width; x++) {	for (y = 0; y != Board.height; y++) {
-		if (x != Board.width-1) Board.board[x][y].beam.l = newboard[x+1][y].l;
-		if (y != Board.height-1) Board.board[x][y].beam.r = newboard[x][y+1].r;
-		if (x) Board.board[x][y].beam.r = newboard[x-1][y].r;
-		if (y) Board.board[x][y].beam.d = newboard[x][y-1].d;
-	}	}
+	for (x = 0; x != Board.width; x++) {
+		for (y = 0; y != Board.height; y++) {
+			if (x != Board.width-1) Board.board[x][y].beam.l = newboard[x+1][y].l;
+			if (y != Board.height-1) Board.board[x][y].beam.r = newboard[x][y+1].r;
+			if (x) Board.board[x][y].beam.r = newboard[x-1][y].r;
+			if (y) Board.board[x][y].beam.d = newboard[x][y-1].d;
+		}
+	}
 }
 
 
@@ -189,10 +193,10 @@ void initboard (unsigned int width, unsigned int height) {
 }
 
 
-
+/*
 void cleanup (void) {
 	delete[] Board.board; // does this delete everything or...?
-}
+}*/
 
 
 
@@ -386,7 +390,12 @@ void updatewindow (void) {
 
 
 int main (int argcount, char* args[]) {
-	/*char* file;
+	const struct alias { char s; char a[]; } aliases[] = {
+		{ 'h', "--help" },
+		{ 0, 0 }
+	};
+	char* file = NULL;
+	
 	// argument parser
 	for (unsigned char i = 0; i != argcount; i++) {
 
@@ -394,11 +403,25 @@ int main (int argcount, char* args[]) {
 			char arg = args[i][1];
 
 			if (arg == '-') {
-				char* a = args[i];
-				// alias system here
+				for (unsigned char al = 0; aliases[al].s != 0; al++) {
+					if (!strcmp (aliases[al].a, args[i])) {
+						arg = aliases[al].s;
+						goto checkarg;
+					}
+				}
+				ARGERR ("Invalid argument");
 			}
-
+			
+			checkarg:
 			switch (arg) {
+				case 'h':
+					//printhelpscreen();
+					exit (0);
+					break;
+				
+				default:
+					ARGERR ("Invalid argument");
+					break;
 			}
 
 		} else {
@@ -406,12 +429,12 @@ int main (int argcount, char* args[]) {
 			file = args[i];
 		}
 
-	}*/
+	}
 
-	char file[] = "./test.txt";
+	if (file == NULL) ARGERR ("No file specified");
+	
 	//load file
-	{
-		FILE* f = fopen (file, "r");
+	{	FILE* f = fopen (file, "r");
 		THISERR (f == NULL, "Could not open file", ENOENT);
 		loadboard (f);
 		fclose (f);
