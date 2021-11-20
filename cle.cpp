@@ -228,7 +228,7 @@ void loadboard (FILE* f) {
 
 
 void rendertext (void) {
-	//SDL_FillRect (TextSurface, NULL, 0x00000000);
+	SDL_FillRect (TextSurface, NULL, 0x00000000);
 	
 	SDL_Surface* tempsurf;
 	
@@ -264,6 +264,18 @@ void rendertext (void) {
 }
 
 
+char* getmonofont (void) {
+	FCERR (FcInit (), "Failed to initialize Fontconfig");
+	
+	FcPattern* mono = FcPatternCreate ();
+	FCERR (FcPatternAddInteger (mono, FC_SPACING, FC_MONO), EM_GENERAL);
+	
+	FCERR (FcConfigSubstitute (NULL, mono, FcMatchPattern), EM_GENERAL);
+	
+	
+}
+
+
 void resizewindow (void) {
 	unsigned int
 		w = Event.window.data1,
@@ -283,8 +295,8 @@ void resizewindow (void) {
 
 void setupwindow (void) {
 	// SDL initialize
-	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL!");
-	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf!");
+	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL");
+	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf");
 	
 	// Window initialize
 	Window = SDL_CreateWindow (
@@ -293,18 +305,18 @@ void setupwindow (void) {
 		800, 600,
 		SDL_WINDOW_RESIZABLE
 	);
-	SDLERR (Window == NULL, "Could not create window!");
+	SDLERR (Window == NULL, "Could not create window");
 	
 	// surface
 	WindowSurface = SDL_GetWindowSurface (Window);
-	SDLERR (WindowSurface == NULL, "Could not retrieve window surface!");
+	SDLERR (WindowSurface == NULL, "Could not retrieve window surface");
 	
 	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
-	
-	// TTF
-	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
-	TTFERR (Font == NULL, "Could not load font!");
+		
+	// load font
+	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
+	TTFERR (Font == NULL, "Could not load font");
 }
 
 
@@ -406,7 +418,7 @@ int main (int argcount, char* args[]) {
 	//load file
 	{
 		FILE* f = fopen (file, "r");
-		THISERR (f == NULL, "Could not open file!", ENOENT);
+		THISERR (f == NULL, "Could not open file", ENOENT);
 		loadboard (f);
 		fclose (f);
 	}

@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <fontconfig/fontconfig.h>
 
 #define RED 0xFF0000
 #define GREEN 0x00FF00
@@ -14,12 +15,14 @@
 
 #define FONT_SIZE 36
 
-#define EM_CREATESURFACE "Could not create surface!"
-
 #define CHECKERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (E%i,L%i)\n", (msg), (code), __LINE__); exit (1); }
 #define SDLERR(cond,msg) CHECKERR (cond, msg, *SDL_GetError ())
 #define TTFERR(cond,msg) CHECKERR (cond, msg, *TTF_GetError ())
 #define THISERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (L%i)\n", (msg), __LINE__); exit(code); }
+#define FCERR(thing,msg) THISERR (!(thing), (msg), 1)
+
+const char EM_GENERAL[] = "Unknown error";
+const char EM_CREATESURFACE[] = "Could not create surface";
 
 typedef unsigned long color;
 
