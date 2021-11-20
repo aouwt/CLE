@@ -185,7 +185,7 @@ void updatebeams (void) {
 
 
 void tick (void) {
-	updatebeams ();
+	//updatebeams ();
 	unsigned int x, y;
 	for (y = 0; y != Board.height; y++) {
 		for (x = 0; x != Board.width; x++)
@@ -216,6 +216,7 @@ void loadboard (FILE* f) {
 	char tempboard[1024][1024] = {0};
 
 	unsigned int x, y;
+	unsigned int w = 0, h = 0;
 	for (y = 0; y != 1024; y++) {
 		for (x = 0; x != 1024; x++) {
 
@@ -227,10 +228,11 @@ void loadboard (FILE* f) {
 			else tempboard[x][y] = c;
 
 		}
+		if (x > w) w =x;
 	}
 
 	next:;
-	unsigned int w = x, h = y;
+	h = y;
 	initboard (w, h);
 	for (y = 0; y != h; y++) {
 		for (x = 0; x != w; x++) {
@@ -238,7 +240,7 @@ void loadboard (FILE* f) {
 		}
 	}
 
-	Board.width = ++w; Board.height = ++h;
+//	Board.width = ++w; Board.height = ++h;
 }
 
 
@@ -371,18 +373,20 @@ void drawbeams (void) {
 	uint32_t* buf = ((uint32_t*)BeamsSurface -> pixels);
 	
 	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
+	#define rgba(rgb) ((rgb) ? ((rgb) | 0xFF000000) : 0)
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
 			for (x = 0; x != Board.width; x++) {
 			
-				buf[get_index(1,1)] = Board.board[x][y].state << 8;
-				buf[get_index(0,1)] = Board.board[x][y].beam.l << 8;
-				buf[get_index(2,1)] = Board.board[x][y].beam.r << 8;
-				buf[get_index(1,0)] = Board.board[x][y].beam.u << 8;
-				buf[get_index(1,2)] = Board.board[x][y].beam.d << 8;
+				buf[get_index(1,1)] = rgba (Board.board[x][y].state);
+				buf[get_index(0,1)] = rgba (Board.board[x][y].beam.l);
+				buf[get_index(2,1)] = rgba (Board.board[x][y].beam.r);
+				buf[get_index(1,0)] = rgba (Board.board[x][y].beam.u);
+				buf[get_index(1,2)] = rgba (Board.board[x][y].beam.d);
 				
 			}
 		}
+	#undef rgba
 	#undef get_index
 }
 
@@ -395,7 +399,7 @@ void updatewindow (void) {
 	drawbeams ();
 	
 	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
-	SDL_BlitScaled (TextSurface, NULL, WindowSurface, NULL);
+//	SDL_BlitScaled (TextSurface, NULL, WindowSurface, NULL);
 	SDL_UpdateWindowSurface (Window);
 }
 
@@ -410,7 +414,7 @@ int main (int argcount, char* args[]) {
 	char* file = NULL;
 	
 	// argument parser
-	for (unsigned char i = 0; i != argcount; i++) {
+	for (unsigned char i = 0; args[i] != NULL; i++) {
 
 		if (args[i][0] == '-') {
 			char arg = args[i][1];
