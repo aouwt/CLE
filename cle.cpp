@@ -55,7 +55,7 @@ void cell::runcell (void) {
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'b': beam = {BLUE}; 
+		case 'b': beam = {BLUE};
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
@@ -79,6 +79,13 @@ void cell::runcell (void) {
 		case '?':
 			if (state)
 				beam = {state};
+			else
+				state = merge (beam);
+			break;
+
+		case '!':
+			if (state)
+				state = {0};
 			else
 				state = merge (beam);
 			break;
@@ -141,7 +148,12 @@ void cell::runcell (void) {
 					};
 			}; break;
 
-		default: op = ' '; UpdateTextSurface = true; break;
+		default:
+			if (Opt_Debug) {
+			} else {
+				op = ' '; UpdateTextSurface = true;
+			}
+			break;
 	}
 }
 
@@ -392,6 +404,7 @@ void updatewindow (void) {
 int main (int argcount, char* args[]) {
 	const struct alias { char s; char* a; } aliases[] = {
 		{ 'h', "--help" },
+		{ 'd', "--debug" },
 		{ 0, 0 }
 	};
 	char* file = NULL;
@@ -418,7 +431,11 @@ int main (int argcount, char* args[]) {
 					//printhelpscreen();
 					exit (0);
 					break;
-				
+
+				case 'd':
+					Opt_Debug = true;
+					break;
+
 				default:
 					ARGERR ("Invalid argument");
 					break;

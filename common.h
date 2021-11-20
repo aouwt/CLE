@@ -62,3 +62,5 @@ TTF_Font* Font;
 
 struct board Board;
 bool UpdateTextSurface = true;
+
+bool Opt_Debug = false;
