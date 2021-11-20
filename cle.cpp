@@ -390,7 +390,7 @@ void updatewindow (void) {
 
 
 int main (int argcount, char* args[]) {
-	const struct alias { char s; char a[]; } aliases[] = {
+	const struct alias { char s; char* a; } aliases[] = {
 		{ 'h', "--help" },
 		{ 0, 0 }
 	};
