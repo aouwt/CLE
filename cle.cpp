@@ -185,7 +185,7 @@ void updatebeams (void) {
 
 
 void tick (void) {
-	//updatebeams ();
+	updatebeams ();
 	unsigned int x, y;
 	for (y = 0; y != Board.height; y++) {
 		for (x = 0; x != Board.width; x++)
@@ -255,7 +255,8 @@ void rendertext (void) {
 		fw = TextSurface -> w / Board.width,
 		fh = TextSurface -> h / Board.height;
 	
-	SDL_Rect rect = { 0,0, fw, fh };
+	SDL_Color white = { 0xFF, 0xFF, 0xFF };
+	SDL_Rect rect = { 0,0, fw,fh };
 	for (y = 0; y != Board.height; y++) {
 		rect.y = fh*y;
 		
@@ -265,7 +266,7 @@ void rendertext (void) {
 			const char op[] = { Board.board[x][y].op, 0 };
 			if (op[0] <= 32) continue;
 			
-			tempsurf = TTF_RenderText_Solid (Font, op, { 0xFF, 0xFF, 0xFF, 0xFF });
+			tempsurf = TTF_RenderText_Solid (Font, op, white);
 			
 			TTFERR (tempsurf == NULL, EM_CREATESURFACE);
 			
@@ -278,6 +279,11 @@ void rendertext (void) {
 			
 		}
 	}
+	
+	/*SDL_DestroyTexture (TextTexture);
+	TextTexture = SDL_CreateTextureFromSurface (Renderer, TextSurface);
+	SDLERR (TextTexture == NULL, "Could not convert surface to texture");*/
+	
 	UpdateTextSurface = false;
 }
 
@@ -302,7 +308,7 @@ void resizewindow (void) {
 
 void setupwindow (void) {
 	// SDL initialize
-	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL");
+	SDLERR (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0, "Could not initialize SDL");
 	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf");
 	
 	// Window initialize
@@ -323,7 +329,11 @@ void setupwindow (void) {
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, 0,0,0,0);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
-		
+	
+	// renderer
+	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
+	//SDLERR (Renderer == NULL, "Could not create renderer");
+	
 	// load font
 	Font = TTF_OpenFont ("./LiberationMono-Regular.ttf", FONT_SIZE);
 	TTFERR (Font == NULL, "Could not load font");
@@ -372,7 +382,7 @@ void eventdriver (void) {
 void drawbeams (void) {
 	uint32_t* buf = ((uint32_t*)BeamsSurface -> pixels);
 	
-	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
+	#define get_index(px,py) (((x*3)+px) + (((y*3)+py) * Board.width))
 	#define rgba(rgb) ((rgb) ? ((rgb) | 0xFF000000) : 0)
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
@@ -398,8 +408,8 @@ void updatewindow (void) {
 	
 	drawbeams ();
 	
+	SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
 	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
-//	SDL_BlitScaled (TextSurface, NULL, WindowSurface, NULL);
 	SDL_UpdateWindowSurface (Window);
 }
 
@@ -467,6 +477,6 @@ int main (int argcount, char* args[]) {
 		tick ();
 		updatewindow ();
 		//getchar ();
-		//SDL_Delay (100);
+		SDL_Delay (100);
 	}
 }

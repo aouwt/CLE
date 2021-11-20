@@ -49,14 +49,14 @@ struct board {
 SDL_Window* Window;
 
 SDL_Surface* WindowSurface;
-SDL_Surface* BeamsSurface;
-SDL_Surface* TextSurface;
+SDL_Surface* BeamsSurface;// SDL_Texture* BeamsTexture;
+SDL_Surface* TextSurface;// SDL_Texture* TextTexture;
 
 SDL_Rect BeamsStretch;
 
 SDL_Event Event;
 
-//SDL_Renderer* Renderer;
+SDL_Renderer* Renderer;
 
 TTF_Font* Font;
 
