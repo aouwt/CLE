@@ -264,17 +264,6 @@ void rendertext (void) {
 }
 
 
-char* getmonofont (void) {
-	FCERR (FcInit (), "Failed to initialize Fontconfig");
-	
-	FcPattern* mono = FcPatternCreate ();
-	FCERR (FcPatternAddInteger (mono, FC_SPACING, FC_MONO), EM_GENERAL);
-	
-	FCERR (FcConfigSubstitute (NULL, mono, FcMatchPattern), EM_GENERAL);
-	
-	
-}
-
 
 void resizewindow (void) {
 	unsigned int
@@ -315,7 +304,7 @@ void setupwindow (void) {
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 		
 	// load font
-	Font = TTF_OpenFont ("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
+	Font = TTF_OpenFont ("./LiberationSansMono-Regular.txt", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
 	TTFERR (Font == NULL, "Could not load font");
 }
 
