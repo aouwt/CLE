@@ -302,9 +302,12 @@ void setupwindow (void) {
 	
 	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
+	
+	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, 0,0,0,0);
+	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
 		
 	// load font
-	Font = TTF_OpenFont ("./LiberationSansMono-Regular.txt", FONT_SIZE);//("/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf", 16);
+	Font = TTF_OpenFont ("./LiberationMono-Regular.ttf", FONT_SIZE);
 	TTFERR (Font == NULL, "Could not load font");
 }
 
@@ -348,24 +351,24 @@ void eventdriver (void) {
 }
 
 
-/*void makebeamsurfacethingaaaaaa (void) {
-	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
+void drawbeams (void) {
+	uint32_t* buf = ((uint32_t*)BeamsSurface -> pixels);
 	
+	#define get_index(px,py) (((x*3)+px) + ((y*3)+py) * Board.width)
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
 			for (x = 0; x != Board.width; x++) {
 			
-				windowbuf[get_index(1,1)] = Board.board[x][y].state << 8;
-				windowbuf[get_index(0,1)] = Board.board[x][y].beam.l << 8;
-				windowbuf[get_index(2,1)] = Board.board[x][y].beam.r << 8;
-				windowbuf[get_index(1,0)] = Board.board[x][y].beam.u << 8;
-				windowbuf[get_index(1,2)] = Board.board[x][y].beam.d << 8;
+				buf[get_index(1,1)] = Board.board[x][y].state << 8;
+				buf[get_index(0,1)] = Board.board[x][y].beam.l << 8;
+				buf[get_index(2,1)] = Board.board[x][y].beam.r << 8;
+				buf[get_index(1,0)] = Board.board[x][y].beam.u << 8;
+				buf[get_index(1,2)] = Board.board[x][y].beam.d << 8;
 				
 			}
 		}
-		
 	#undef get_index
-}*/
+}
 
 
 
@@ -373,7 +376,9 @@ void updatewindow (void) {
 	if (SDL_PollEvent (&Event)) eventdriver ();
 	if (UpdateTextSurface) rendertext ();
 	
-	//SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
+	drawbeams ();
+	
+	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
 	SDL_BlitScaled (TextSurface, NULL, WindowSurface, NULL);
 	SDL_UpdateWindowSurface (Window);
 }
