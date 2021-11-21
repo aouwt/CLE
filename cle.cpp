@@ -17,9 +17,9 @@ color filter (color bcolor, color fcolor) {
 	if (!max) return 0;
 
 	return rgb (
-		gr(bcolor) * (gr(fcolor) / max),
-		gg(bcolor) * (gg(fcolor) / max),
-		gb(bcolor) * (gb(fcolor) / max)
+		gr(bcolor) * (gr(fcolor)(float) / max),
+		gg(bcolor) * (gg(fcolor)(float) / max),
+		gb(bcolor) * (gb(fcolor)(float) / max)
 	);
 }
 
@@ -103,7 +103,7 @@ void cell::runcell (void) {
 			}; break;
 
 		case '@':
-			beam = {beam.r, beam.l, beam.d, beam.u};
+			beam = {beam.d, beam.u, beam.r, beam.l};
 			break;
 
 		case '{': {
@@ -125,8 +125,8 @@ void cell::runcell (void) {
 		case '(': if (beam.l) { beam.r = beam.l; beam.l = 0; } break;
 		case ')': if (beam.r) { beam.l = beam.r; beam.r = 0; } break;
 
-		case'\\': beam = {beam.u, beam.d, beam.l, beam.r}; break;
-		case '/': beam = {beam.d, beam.u, beam.r, beam.l}; break;
+		case'\\': beam = {beam.l, beam.r, beam.u, beam.d}; break;
+		case '/': beam = {beam.r, beam.l, beam.d, beam.u}; break;
 
 		case '|': beam.l = beam.r = 0; break;
 		case '-': beam.u = beam.d = 0; break;
@@ -145,10 +145,10 @@ void cell::runcell (void) {
 					vc = beam.u | beam.d;
 
 				if (hc && vc) beam = {
-						filter (beam.l, vc),
-						filter (beam.r, vc),
-						filter (beam.u, hc),
-						filter (beam.d, hc)
+						filter (beam.u, vc),
+						filter (beam.d, vc),
+						filter (beam.l, hc),
+						filter (beam.r, hc)
 					};
 			}; break;
 
