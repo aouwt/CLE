@@ -17,9 +17,9 @@ color filter (color bcolor, color fcolor) {
 	if (!max) return 0;
 
 	return rgb (
-		gr(bcolor) * (gr(fcolor)(float) / max),
-		gg(bcolor) * (gg(fcolor)(float) / max),
-		gb(bcolor) * (gb(fcolor)(float) / max)
+		gr(bcolor) * (float(gr(fcolor)) / max),
+		gg(bcolor) * (float(gg(fcolor)) / max),
+		gb(bcolor) * (float(gb(fcolor)) / max)
 	);
 }
 
