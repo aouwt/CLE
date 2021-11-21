@@ -179,7 +179,7 @@ void updatebeams (void) {
 	for (x = 0; x != Board.width; x++) {
 		for (y = 0; y != Board.height; y++) {
 			if (x != Board.width-1) Board.board[x][y].beam.l = newboard[x+1][y].l;
-			if (y != Board.height-1) Board.board[x][y].beam.r = newboard[x][y+1].r;
+			if (y != Board.height-1) Board.board[x][y].beam.u = newboard[x][y+1].u;
 			if (x) Board.board[x][y].beam.r = newboard[x-1][y].r;
 			if (y) Board.board[x][y].beam.d = newboard[x][y-1].d;
 		}
@@ -297,6 +297,9 @@ void rendertext (void) {
 	TextTexture = SDL_CreateTextureFromSurface (Renderer, TextSurface);
 	SDLERR (TextTexture == NULL, "Could not convert surface to texture");*/
 	
+	//TextSurfaceOptimized = SDL_ConvertSurface (TextSurface, ScreenSurface -> format, 0);
+	//SDLERR (TextSurfaceOptimized == NULL, "Could not optimize surface");
+	
 	UpdateTextSurface = false;
 }
 
@@ -309,7 +312,7 @@ void resizewindow (void) {
 		
 	SDL_FreeSurface (TextSurface);
 	
-	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, 0,0,0,0);
+	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, DEFMASK);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
 	UpdateTextSurface = true;
@@ -321,7 +324,7 @@ void resizewindow (void) {
 
 void setupwindow (void) {
 	// SDL initialize
-	SDLERR (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0, "Could not initialize SDL");
+	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL");
 	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf");
 	
 	// Window initialize
@@ -337,12 +340,12 @@ void setupwindow (void) {
 	WindowSurface = SDL_GetWindowSurface (Window);
 	SDLERR (WindowSurface == NULL, "Could not retrieve window surface");
 	
-	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, 0,0,0,0);
+	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, DEFMASK);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
-	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, 0,0,0,0);
+	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, DEFMASK);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
-	SDL_FillRect (BeamsSurface, NULL, 0x7F7F7F7F);
+	//SDL_FillRect (BeamsSurface, NULL, 0x7F7F7F7F);
 	
 	// renderer
 	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
@@ -401,7 +404,7 @@ void drawbeams (void) {
 		(((y * 3) + (py)) * (Board.width * 3)) \
 	)
 	
-	#define rgba(rgb) ((rgb) ? ((rgb) | 0xFF000000) : 0)
+	#define rgba(rgb) /*((rgb) ? */((rgb) | 0xFF000000)/* : 0)*/
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
 			for (x = 0; x != Board.width; x++) {
@@ -421,13 +424,14 @@ void drawbeams (void) {
 
 
 void updatewindow (void) {
-	if (SDL_PollEvent (&Event)) eventdriver ();
+	while (SDL_PollEvent (&Event)) eventdriver ();
 	if (UpdateTextSurface) rendertext ();
 	
 	drawbeams ();
 	
-	SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
+	//SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
 	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
+	SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
 	SDL_UpdateWindowSurface (Window);
 }
 
@@ -494,7 +498,7 @@ int main (int argcount, char* args[]) {
 	while (true) {
 		tick ();
 		updatewindow ();
-		//getchar ();
-		SDL_Delay (100);
+		getchar ();
+	//	SDL_Delay (100);
 	}
 }

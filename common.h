@@ -20,6 +20,7 @@
 #define TTFERR(cond,msg) CHECKERR (cond, msg, *TTF_GetError ())
 #define THISERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (L%i)\n", (msg), __LINE__); exit (code); }
 #define ARGERR(msg) { fprintf (stderr, "ERROR: %s (L%i)\n", msg, __LINE__); exit (EINVAL); }
+#define DEFMASK 0x00FF0000,0x0000FF00,0x000000FF,0xFF000000
 
 const char EM_GENERAL[] = "Unknown error";
 const char EM_CREATESURFACE[] = "Could not create surface";
@@ -50,7 +51,7 @@ SDL_Window* Window;
 
 SDL_Surface* WindowSurface;
 SDL_Surface* BeamsSurface;// SDL_Texture* BeamsTexture;
-SDL_Surface* TextSurface;// SDL_Texture* TextTexture;
+SDL_Surface* TextSurface;// SDL_Surface* TextOptimizedSurface; // SDL_Texture* TextTexture;
 
 SDL_Rect BeamsStretch;
 
