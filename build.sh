@@ -1,2 +1,2 @@
 #!/bin/sh
-c++ cle.cpp $(pkg-config x11 gl sdl2 SDL2_ttf --libs --cflags) -Wall -ggdb -o ./cle
+c++ $@ ./src/gui.cpp ./src/cle.cpp -Wall $(pkg-config --libs --cflags sdl2 SDL2_ttf gl x11) -o ./cle
