@@ -240,6 +240,15 @@ void loadboard (FILE* f) {
 	initboard (w, h);
 	for (y = 0; y != h; y++) {
 		for (x = 0; x != w; x++) {
+			switch (tempboard[x][y]) {
+				case 'r': case 'R': Board.board[x][y].state = RED; break;
+				case 'g': case 'G': Board.board[x][y].state = GREEN; break;
+				case 'b': case 'B': Board.board[x][y].state = BLUE; break;
+				case 'c': case 'C': Board.board[x][y].state = CYAN; break;
+				case 'y': case 'Y': Board.board[x][y].state = YELLOW; break;
+				case 'm': case 'M': Board.board[x][y].state = MAGENTA; break;
+				case 'w': case 'W': Board.board[x][y].state = WHITE; break;
+			}
 			Board.board[x][y].op = tempboard[x][y];
 		}
 	}
@@ -270,7 +279,7 @@ void rendertext (void) {
 			const char op[] = { Board.board[x][y].op, 0 };
 			if (op[0] <= 32) continue;
 			
-			tempsurf = TTF_RenderText_Solid (Font, op, white);
+			tempsurf = TTF_RenderText_Blended (Font, op, white);
 			
 			TTFERR (tempsurf == NULL, EM_CREATESURFACE);
 			
@@ -333,7 +342,7 @@ void setupwindow (void) {
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, 0,0,0,0);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
-	SDL_FillRect (BeamsSurface, NULL, 0xFFFFFFFF);
+	SDL_FillRect (BeamsSurface, NULL, 0x7F7F7F7F);
 	
 	// renderer
 	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
@@ -392,7 +401,7 @@ void drawbeams (void) {
 		(((y * 3) + (py)) * (Board.width * 3)) \
 	)
 	
-	#define rgba(rgb) /*((rgb) ? */((rgb) | 0xFF000000) /* : 0)*/
+	#define rgba(rgb) ((rgb) ? ((rgb) | 0xFF000000) : 0)
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
 			for (x = 0; x != Board.width; x++) {
