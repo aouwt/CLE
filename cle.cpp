@@ -36,56 +36,60 @@ color merge (struct beams colors) {
 	return rgb (r,g,b);
 }
 
+struct beams distcolor (color color) {
+	return { color, color, color, color };
+}
+
 
 void cell::runcell (void) {
 	switch (op) {
-		case 'R': beam = {RED}; break;
-		case 'G': beam = {GREEN}; break;
-		case 'B': beam = {BLUE}; break;
-		case 'W': beam = {WHITE}; break;
-		case 'Y': beam = {YELLOW}; break;
-		case 'C': beam = {CYAN}; break;
-		case 'M': beam = {MAGENTA}; break;
+		case 'R': beam = distcolor (RED); break;
+		case 'G': beam = distcolor (GREEN); break;
+		case 'B': beam = distcolor (BLUE); break;
+		case 'W': beam = distcolor (WHITE); break;
+		case 'Y': beam = distcolor (YELLOW); break;
+		case 'C': beam = distcolor (CYAN); break;
+		case 'M': beam = distcolor (MAGENTA); break;
 
-		case 'r': beam = {RED};
+		case 'r': beam = distcolor (RED);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'g': beam = {GREEN};
+		case 'g': beam = distcolor (GREEN);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'b': beam = {BLUE};
+		case 'b': beam = distcolor (BLUE);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'w': beam = {WHITE};
+		case 'w': beam = distcolor (WHITE);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'y': beam = {YELLOW};
+		case 'y': beam = distcolor (YELLOW);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'c': beam = {CYAN};
+		case 'c': beam = distcolor (CYAN);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
-		case 'm': beam = {MAGENTA};
+		case 'm': beam = distcolor (MAGENTA);
 			op = '\0';
 			UpdateTextSurface = true;
 			break;
 
 		case '?':
 			if (state)
-				beam = {state};
+				beam = distcolor (state);
 			else
 				state = merge (beam);
 			break;
 
 		case '!':
 			if (state)
-				state = {0};
+				state = 0;
 			else
 				state = merge (beam);
 			break;
@@ -329,6 +333,7 @@ void setupwindow (void) {
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, 0,0,0,0);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
+	SDL_FillRect (BeamsSurface, NULL, 0xFFFFFFFF);
 	
 	// renderer
 	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
@@ -382,8 +387,12 @@ void eventdriver (void) {
 void drawbeams (void) {
 	uint32_t* buf = ((uint32_t*)BeamsSurface -> pixels);
 	
-	#define get_index(px,py) (((x*3)+px) + (((y*3)+py) * Board.width))
-	#define rgba(rgb) ((rgb) ? ((rgb) | 0xFF000000) : 0)
+	#define get_index(px,py) ( \
+		((x * 3) + (px)) + \
+		(((y * 3) + (py)) * (Board.width * 3)) \
+	)
+	
+	#define rgba(rgb) /*((rgb) ? */((rgb) | 0xFF000000) /* : 0)*/
 		unsigned int x, y;
 		for (y = 0; y != Board.height; y++) {
 			for (x = 0; x != Board.width; x++) {
