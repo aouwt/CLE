@@ -13,7 +13,7 @@
 #define WHITE 0xFFFFFF
 #define BLACK 0x000000
 
-#define FONT_SIZE 36
+#define FONT_SIZE 16
 
 #define CHECKERR(cond,msg,code) if (cond) { fprintf (stderr, "ERROR: %s (E%i,L%i)\n", (msg), (code), __LINE__); exit (1); }
 #define SDLERR(cond,msg) CHECKERR (cond, msg, *SDL_GetError ())

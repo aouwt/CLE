@@ -132,6 +132,7 @@ void cell::runcell (void) {
 		case '-': beam.u = beam.d = 0; break;
 
 		case ' ': {
+				state = merge (beam);
 				color hc, vc;
 
 				if (beam.l && beam.r)
@@ -145,10 +146,10 @@ void cell::runcell (void) {
 					vc = beam.u | beam.d;
 
 				if (hc && vc) beam = {
-						filter (beam.u, vc),
-						filter (beam.d, vc),
-						filter (beam.l, hc),
-						filter (beam.r, hc)
+						filter (beam.r, vc),
+						filter (beam.l, vc),
+						filter (beam.d, hc),
+						filter (beam.u, hc)
 					};
 			}; break;
 
@@ -261,7 +262,7 @@ void loadboard (FILE* f) {
 void rendertext (void) {
 	SDL_FillRect (TextSurface, NULL, 0x00000000);
 	
-	SDL_Surface* tempsurf;
+	SDL_Surface *tempsurf, *tempsurf2;
 	
 	unsigned int x, y;
 	unsigned char
@@ -279,16 +280,18 @@ void rendertext (void) {
 			const char op[] = { Board.board[x][y].op, 0 };
 			if (op[0] <= 32) continue;
 			
-			tempsurf = TTF_RenderText_Blended (Font, op, white);
-			
+			tempsurf = TTF_RenderText_Solid (Font, op, white);
 			TTFERR (tempsurf == NULL, EM_CREATESURFACE);
 			
+			tempsurf2 = SDL_ConvertSurface (tempsurf, TextSurface -> format, 0);
+			SDLERR (tempsurf2 == NULL, EM_CREATESURFACE);
+			
 			SDL_BlitScaled (
-				tempsurf, NULL,
+				tempsurf2, NULL,
 				TextSurface, &rect
 			);
 			
-			SDL_FreeSurface (tempsurf);
+			SDL_FreeSurface (tempsurf); SDL_FreeSurface (tempsurf2);
 			
 		}
 	}
@@ -331,7 +334,7 @@ void setupwindow (void) {
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		800, 600,
+		Board.width*FONT_SIZE*2,Board.height*FONT_SIZE*2,
 		SDL_WINDOW_RESIZABLE
 	);
 	SDLERR (Window == NULL, "Could not create window");
@@ -340,12 +343,12 @@ void setupwindow (void) {
 	WindowSurface = SDL_GetWindowSurface (Window);
 	SDLERR (WindowSurface == NULL, "Could not retrieve window surface");
 	
-	TextSurface = SDL_CreateRGBSurface (0, 800,600, 32, DEFMASK);
+	TextSurface = SDL_CreateRGBSurface (0, Board.width * FONT_SIZE*2, Board.height * FONT_SIZE*2, 32, DEFMASK);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, DEFMASK);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
-	//SDL_FillRect (BeamsSurface, NULL, 0x7F7F7F7F);
+	SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
 	
 	// renderer
 	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
