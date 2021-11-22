@@ -376,6 +376,7 @@ int main (int argcount, char* args[]) {
 		tick ();
 		#ifdef _GUI
 			updatewindow ();
+			waitforrefresh ();
 		#endif
 		if (Opt_Step) getchar ();
 		if (Opt_Delay) usleep (Opt_Delay);

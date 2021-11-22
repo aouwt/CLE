@@ -13,6 +13,7 @@
 	extern void setupwindow (void);
 	extern void stopsdl (void);
 	extern void updatewindow (void);
+	extern void waitforrefresh (void);
 	
 	extern const char EM_GENERAL[];
 #endif

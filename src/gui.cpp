@@ -69,7 +69,7 @@ void setupwindow (void) {
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
 	//SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
 	
-	TickSize = GetWindowRefreshRate ();
+	TickSize = 1000 / GetWindowRefreshRate ();
 	
 }
 
@@ -120,7 +120,7 @@ void resizewindow (void) {
 	
 	SDL_FillRect (WindowSurface, NULL, 0x00000000);
 	
-	TickSize = GetWindowRefreshRate ();
+	TickSize = 1000 / GetWindowRefreshRate ();
 }
 
 
@@ -235,5 +235,8 @@ void updatewindow (void) {
 
 
 void waitforrefresh (void) {
-	
+	static unsigned long last = 0;
+	unsigned long target = SDL_GetTicks () + TickSize;
+	if (last < target) SDL_Delay (target - last);
+	last = target;
 }
