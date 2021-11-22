@@ -45,7 +45,7 @@ void setupwindow (void) {
 		scrw = FontW * Board.width,
 		scrh = FontH * Board.height;
 	
-	Letterbox = { 0,0, scrw, scrh };
+	Letterbox = { 0,0, int(scrw), int(scrh) };
 	ScrRatio = scrw / scrh;
 	
 	// Window initialize
@@ -106,7 +106,7 @@ void resizewindow (void) {
 		h = float(w) * (1.0/ScrRatio);
 	}
 
-	Letterbox = { 0,0, w,h };
+	Letterbox = { 0,0, int(w),int(h) };
 
 	SDL_FreeSurface (TextSurface);
 	

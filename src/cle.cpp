@@ -304,7 +304,7 @@ void printhelpscreen (char *cmd) {
 
 
 int main (int argcount, char* args[]) {
-	struct alias { char s; char* a; } aliases[] = {
+	struct alias { char s; const char* a; } aliases[] = {
 		{ 'h', "--help" },
 		//{ 'd', "--debug" },
 		{ 0, 0 }
