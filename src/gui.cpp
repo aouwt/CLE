@@ -40,7 +40,7 @@ void setupwindow (void) {
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, DEFMASK);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
-	SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
+	//SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
 	
 	// renderer
 	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
