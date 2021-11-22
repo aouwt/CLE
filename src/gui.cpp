@@ -9,23 +9,50 @@
 
 SDL_Window *Window;
 SDL_Surface *WindowSurface, *BeamsSurface, *TextSurface;
-SDL_Rect BeamsStretch;
+SDL_Rect Letterbox;
 SDL_Event Event;
 TTF_Font *Font;
 
 const char EM_CREATESURFACE[] = "Could not create surface";
 bool UpdateTextSurface = false;
 
+int FontW, FontH;
+float ScrRatio;
+
+unsigned int TickSize = 1000 / 60;
+
+unsigned int GetWindowRefreshRate (void) {
+	SDL_DisplayMode mode;
+	if (SDL_GetDesktopDisplayMode (SDL_GetWindowDisplayIndex (Window), &mode))
+		return 60;
+	else if (mode.refresh_rate)
+		return mode.refresh_rate;
+	else
+		return 60;
+}
+
 void setupwindow (void) {
 	// SDL initialize
 	SDLERR (SDL_Init (SDL_INIT_VIDEO) < 0, "Could not initialize SDL");
 	TTFERR (TTF_Init () < 0, "Could not initialize SDL_ttf");
 	
+	// load font
+	Font = TTF_OpenFont ("./rc/LiberationMono-Regular.ttf", FONT_SIZE);
+	TTFERR (Font == NULL, "Could not load font");
+	
+	TTFERR (TTF_SizeText (Font, "#", &FontW, &FontH), EM_GENERAL);
+	unsigned int
+		scrw = FontW * Board.width,
+		scrh = FontH * Board.height;
+	
+	Letterbox = { 0,0, scrw, scrh };
+	ScrRatio = scrw / scrh;
+	
 	// Window initialize
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		Board.width * FONT_SIZE, Board.height * FONT_SIZE,
+		scrw, scrh,
 		SDL_WINDOW_RESIZABLE
 	);
 
@@ -35,20 +62,15 @@ void setupwindow (void) {
 	WindowSurface = SDL_GetWindowSurface (Window);
 	SDLERR (WindowSurface == NULL, "Could not retrieve window surface");
 	
-	TextSurface = SDL_CreateRGBSurface (0, Board.width * FONT_SIZE, Board.height * FONT_SIZE, 32, DEFMASK);
+	TextSurface = SDL_CreateRGBSurface (0, scrw, scrh, 32, DEFMASK);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, DEFMASK);
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
 	//SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
 	
-	// renderer
-	//Renderer = SDL_CreateRenderer (Window, -1, NULL);
-	//SDLERR (Renderer == NULL, "Could not create renderer");
+	TickSize = GetWindowRefreshRate ();
 	
-	// load font
-	Font = TTF_OpenFont ("./rc/LiberationMono-Regular.ttf", FONT_SIZE);
-	TTFERR (Font == NULL, "Could not load font");
 }
 
 void stopsdl (void) {
@@ -75,7 +97,17 @@ void resizewindow (void) {
 	unsigned int
 		w = Event.window.data1,
 		h = Event.window.data2;
-		
+	
+	if ((w * (1.0/ScrRatio)) > (h * ScrRatio)) {
+		// prioritize height
+		w = h * (ScrRatio);
+	} else {
+		// prioritize width
+		h = float(w) * (1.0/ScrRatio);
+	}
+
+	Letterbox = { 0,0, w,h };
+
 	SDL_FreeSurface (TextSurface);
 	
 	TextSurface = SDL_CreateRGBSurface (0, w,h, 32, DEFMASK);
@@ -85,6 +117,10 @@ void resizewindow (void) {
 	
 	SDL_SetWindowSize (Window, w, h);
 	WindowSurface = SDL_GetWindowSurface (Window);
+	
+	SDL_FillRect (WindowSurface, NULL, 0x00000000);
+	
+	TickSize = GetWindowRefreshRate ();
 }
 
 
@@ -191,7 +227,13 @@ void updatewindow (void) {
 	drawbeams ();
 	
 	//SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
-	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, NULL);
-	SDL_BlitSurface (TextSurface, NULL, WindowSurface, NULL);
+	SDL_BlitScaled (BeamsSurface, NULL, WindowSurface, &Letterbox);
+	SDL_BlitSurface (TextSurface, NULL, WindowSurface, &Letterbox);
 	SDL_UpdateWindowSurface (Window);
+}
+
+
+
+void waitforrefresh (void) {
+	
 }
