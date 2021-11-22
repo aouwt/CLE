@@ -4,9 +4,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
+#include <unistd.h>
 
 struct board Board;
 bool Opt_Debug = false;
+unsigned int Opt_Delay = 0;
+bool Opt_Step = false;
 
 
 color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
@@ -284,12 +287,15 @@ void loadboard (FILE* f) {
 }
 
 
-
+void printhelpscreen (char *cmd) {
+	printf ("Usage: %s [options] file\n", cmd);
+	printf ("\n");
+	printf ("
 
 
 
 int main (int argcount, char* args[]) {
-	const struct alias { char s; char* a; } aliases[] = {
+	struct alias { char s; char* a; } aliases[] = {
 		{ 'h', "--help" },
 		{ 'd', "--debug" },
 		{ 0, 0 }
@@ -300,12 +306,12 @@ int main (int argcount, char* args[]) {
 	for (unsigned char i = 0; args[i] != NULL; i++) {
 
 		if (args[i][0] == '-') {
-			char arg = args[i][1];
+			char* arg = args[i] + 1;
 
-			if (arg == '-') {
+			if (arg[0] == '-') {
 				for (unsigned char al = 0; aliases[al].s != 0; al++) {
 					if (!strcmp (aliases[al].a, args[i])) {
-						arg = aliases[al].s;
+						arg = &aliases[al].s;
 						goto checkarg;
 					}
 				}
@@ -313,19 +319,29 @@ int main (int argcount, char* args[]) {
 			}
 			
 			checkarg:
-			switch (arg) {
-				case 'h':
-					//printhelpscreen();
+			for (unsigned char ac = 0; arg[ac]; ac++) {
+				switch (arg[0]) {
+					case 'h':
+					printhelpscreen (args[0]);
 					exit (0);
 					break;
 
-				case 'd':
-					Opt_Debug = true;
-					break;
+	//				case 'd':
+	//					Opt_Debug = true;
+	//					break;
 
-				default:
-					ARGERR ("Invalid argument");
-					break;
+					case 's':
+						Opt_Step = true;
+						break;
+
+					case 'D':
+						Opt_Delay = atoi (args[++i]) * 1000;
+						break;
+
+					default:
+						ARGERR ("Invalid argument");
+						break;
+				}
 			}
 
 		} else {
@@ -352,7 +368,7 @@ int main (int argcount, char* args[]) {
 		#ifdef _GUI
 			updatewindow ();
 		#endif
-		getchar ();
-	//	SDL_Delay (100);
+		if (Opt_Step) getchar ();
+		if (Opt_Delay) usleep (Opt_Delay);
 	}
 }

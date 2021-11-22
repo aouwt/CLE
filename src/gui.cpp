@@ -25,9 +25,10 @@ void setupwindow (void) {
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		Board.width*FONT_SIZE*2,Board.height*FONT_SIZE*2,
+		Board.width * FONT_SIZE * 2, Board.height * FONT_SIZE * 2,
 		SDL_WINDOW_RESIZABLE
 	);
+
 	SDLERR (Window == NULL, "Could not create window");
 	
 	// surface
