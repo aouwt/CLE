@@ -106,20 +106,21 @@ void cell::runcell (void) {
 			#endif
 			break;
 
-		case '?':
-			if (state)
+		case '?': {
+				color m = merge (beam);
+				if (m && (m != state)) state = m;
 				beam = distcolor (state);
-			else
-				state = merge (beam);
+			}
 			break;
 
 		case '!':
-			if (state)
+			if (state) {
+				beam = distcolor (state);
 				state = 0;
-			else
+			} else
 				state = merge (beam);
 			break;
-
+			
 		case '#':
 			beam = {
 				rgb (gr(beam.u) / 2, gg(beam.u) / 2, gb(beam.u) / 2),
@@ -156,6 +157,9 @@ void cell::runcell (void) {
 
 		case '|': beam.l = beam.r = 0; break;
 		case '-': beam.u = beam.d = 0; break;
+		
+		case '[': beam.l = 0; break;
+		case ']': beam.r = 0; break;
 
 		case ' ': {
 				state = merge (beam);
