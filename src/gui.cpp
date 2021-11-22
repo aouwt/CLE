@@ -19,7 +19,7 @@ bool UpdateTextSurface = false;
 int FontW, FontH;
 float ScrRatio;
 
-unsigned int TickSize = 1000 / 60;
+unsigned int FrameTime = 1000 / 60;
 
 unsigned int GetWindowRefreshRate (void) {
 	SDL_DisplayMode mode;
@@ -69,7 +69,7 @@ void setupwindow (void) {
 	SDLERR (BeamsSurface == NULL, EM_CREATESURFACE);
 	//SDL_FillRect (BeamsSurface, NULL, 0xFF7F7F7F);
 	
-	TickSize = 1000 / GetWindowRefreshRate ();
+	FrameTime = 1000 / GetWindowRefreshRate ();
 	
 }
 
@@ -120,7 +120,7 @@ void resizewindow (void) {
 	
 	SDL_FillRect (WindowSurface, NULL, 0x00000000);
 	
-	TickSize = 1000 / GetWindowRefreshRate ();
+	FrameTime = 1000 / GetWindowRefreshRate ();
 }
 
 
@@ -235,8 +235,10 @@ void updatewindow (void) {
 
 
 void waitforrefresh (void) {
-	static unsigned long last = 0;
-	unsigned long target = SDL_GetTicks () + TickSize;
-	if (last < target) SDL_Delay (target - last);
+	static unsigned long last;
+	unsigned long
+		target = last + FrameTime,
+		now = SDL_GetTicks ();
+	if (target > now) SDL_Delay (target - now);
 	last = target;
 }
