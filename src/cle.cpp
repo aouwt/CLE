@@ -122,10 +122,10 @@ void cell::runcell (void) {
 
 		case '#':
 			beam = {
-				rgb (gr(beam.l) / 2, gg(beam.l) / 2, gb(beam.l) / 2),
-				rgb (gr(beam.r) / 2, gg(beam.r) / 2, gb(beam.r) / 2),
 				rgb (gr(beam.u) / 2, gg(beam.u) / 2, gb(beam.u) / 2),
-				rgb (gr(beam.d) / 2, gg(beam.d) / 2, gb(beam.d) / 2)
+				rgb (gr(beam.d) / 2, gg(beam.d) / 2, gb(beam.d) / 2),
+				rgb (gr(beam.l) / 2, gg(beam.l) / 2, gb(beam.l) / 2),
+				rgb (gr(beam.r) / 2, gg(beam.r) / 2, gb(beam.r) / 2)
 			}; break;
 
 		case '@':
