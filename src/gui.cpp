@@ -25,7 +25,7 @@ void setupwindow (void) {
 	Window = SDL_CreateWindow (
 		"CLE",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-		Board.width * FONT_SIZE * 2, Board.height * FONT_SIZE * 2,
+		Board.width * FONT_SIZE, Board.height * FONT_SIZE,
 		SDL_WINDOW_RESIZABLE
 	);
 
@@ -35,7 +35,7 @@ void setupwindow (void) {
 	WindowSurface = SDL_GetWindowSurface (Window);
 	SDLERR (WindowSurface == NULL, "Could not retrieve window surface");
 	
-	TextSurface = SDL_CreateRGBSurface (0, Board.width * FONT_SIZE*2, Board.height * FONT_SIZE*2, 32, DEFMASK);
+	TextSurface = SDL_CreateRGBSurface (0, Board.width * FONT_SIZE, Board.height * FONT_SIZE, 32, DEFMASK);
 	SDLERR (TextSurface == NULL, EM_CREATESURFACE);
 	
 	BeamsSurface = SDL_CreateRGBSurface (0, Board.width*3, Board.height*3, 32, DEFMASK);

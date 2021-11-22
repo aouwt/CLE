@@ -26,7 +26,7 @@ color filter (color bcolor, color fcolor) {
 	unsigned char max = gr (fcolor);
 	if (gg (fcolor) > max) max = gg (fcolor);
 	if (gb (fcolor) > max) max = gb (fcolor);
-	if (!max) return 0;
+	if (max == 0) return 0;
 
 	return rgb (
 		gr(bcolor) * (float(gr(fcolor)) / max),
@@ -288,22 +288,31 @@ void loadboard (FILE* f) {
 
 
 void printhelpscreen (char *cmd) {
-	printf ("Usage: %s [options] file\n", cmd);
+	printf ("CLE -- Color Laser Esolang\n");
+	printf ("https://esolang.org/wiki/CLE\n");
+	printf ("https://github.com/aouwt/CLE\n");
 	printf ("\n");
-	printf ("
+	printf ("Usage: %s [options] <file>\n", cmd);
+	printf ("\n");
+	printf (" -h, --help   Displays this help message\n");
+	printf (" -s, --step   Enables single-stepping mode\n");
+	//printf (" -d, --debug  Enables debugging features\n");
+	printf (" -D, --delay <num>  Set the delay between cycles\n");
+	printf ("\n");
+}
 
 
 
 int main (int argcount, char* args[]) {
 	struct alias { char s; char* a; } aliases[] = {
 		{ 'h', "--help" },
-		{ 'd', "--debug" },
+		//{ 'd', "--debug" },
 		{ 0, 0 }
 	};
 	char* file = NULL;
 	
 	// argument parser
-	for (unsigned char i = 0; args[i] != NULL; i++) {
+	for (unsigned char i = 1; args[i] != NULL; i++) {
 
 		if (args[i][0] == '-') {
 			char* arg = args[i] + 1;
