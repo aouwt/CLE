@@ -5,6 +5,9 @@
 #include <string.h>
 #include <cstdlib>
 #include <unistd.h>
+#ifdef _GUI
+	#include <SDL.h>
+#endif
 
 struct board Board;
 bool Opt_Debug = false;
