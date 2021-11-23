@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <errno.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+//#include <SDL2/SDL.h> // included via pkg-config
+#include <SDL2/SDL_ttf.h> // included via pkg-config
 
 
 SDL_Window *Window;
