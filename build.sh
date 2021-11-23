@@ -1,2 +1,2 @@
 #!/bin/sh
-c++ $@ $(pkg-config --libs --cflags --static sdl2 SDL2_ttf) ./src/gui.cpp ./src/cle.cpp -o ./cle
+c++ $@ ./src/cle.cpp ./src/gui.cpp $(pkg-config --libs sdl2 SDL2_ttf) -o ./cle
