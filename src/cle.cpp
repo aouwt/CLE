@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #ifdef _GUI
-	#include <SDL.h>
+	#include <SDL2/SDL.h>
 #endif
 
 struct board Board;
