@@ -1,5 +1,6 @@
 #include "cle.hpp"
 #include "gui.hpp"
+#include "gif.hpp"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,7 @@ struct board Board;
 bool Opt_Debug = false;
 unsigned int Opt_Delay = 0;
 bool Opt_Step = false;
+char *Opt_GIF = NULL;
 
 
 color rgb (unsigned char r, unsigned char g, unsigned char b) { return (r << 16) | (g << 8) | b; }
@@ -335,10 +337,10 @@ int main (int argcount, char* args[]) {
 			}
 			
 			checkarg:
-			for (unsigned char ac = 0; arg[ac]; ac++) {
+			for (unsigned char ac = 0; arg [ac]; ac ++) {
 				switch (arg[0]) {
 					case 'h':
-					printhelpscreen (args[0]);
+					printhelpscreen (args [0]);
 					exit (0);
 					break;
 
@@ -351,7 +353,11 @@ int main (int argcount, char* args[]) {
 						break;
 
 					case 'D':
-						Opt_Delay = atoi (args[++i]) * 1000;
+						Opt_Delay = atoi (args [++ i]) * 1000;
+						break;
+					
+					case 'g':
+						Opt_GIF = args [++ i];
 						break;
 
 					default:
@@ -377,14 +383,21 @@ int main (int argcount, char* args[]) {
 	}
 	
 	#ifdef _GUI
-		setupwindow ();
+		GUI_setup ();
 	#endif
+	#ifdef _GIF
+		if (Opt_GIF != NULL) GIF_setup ();
+	#endif
+	
 	while (true) {
 		tick ();
 		#ifdef _GUI
-			updatewindow ();
-			waitforrefresh ();
+			GUI_tick ();
 		#endif
+		#ifdef _GIF
+			if (Opt_GIF != NULL) GIF_tick ();
+		#endif
+		
 		if (Opt_Step) getchar ();
 		if (Opt_Delay) usleep (Opt_Delay);
 	}

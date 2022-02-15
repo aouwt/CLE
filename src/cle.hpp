@@ -49,4 +49,6 @@
 	
 	extern struct board Board;
 	extern bool UpdateTextSurface;
+	
+	extern char *Opt_GIF;
 #endif

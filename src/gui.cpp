@@ -6,7 +6,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-
 SDL_Window *Window;
 SDL_Surface *WindowSurface, *BeamsSurface, *TextSurface;
 SDL_Rect Letterbox;
@@ -30,6 +29,7 @@ unsigned int GetWindowRefreshRate (void) {
 	else
 		return 60;
 }
+
 
 void setupwindow (void) {
 	// SDL initialize
@@ -74,6 +74,9 @@ void setupwindow (void) {
 }
 
 void stopsdl (void) {
+	#ifdef _GIF
+		if (Opt_GIF != NULL) GIF_save ();
+	#endif
 	// SDL
 	SDL_FreeSurface (WindowSurface);
 	SDL_FreeSurface (BeamsSurface);
@@ -242,3 +245,10 @@ void waitforrefresh (void) {
 	if (target > now) SDL_Delay (target - now);
 	last = target;
 }
+
+
+
+
+void GUI_setup (void) {	setupwindow ();	}
+void GUI_tick (void) {	waitforrefresh (); updatewindow ();	}
+

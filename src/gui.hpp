@@ -1,7 +1,5 @@
 #ifndef GUI_HPP
 	#define GUI_HPP
-	
-	#define _GUI
 
 	#define FONT_SIZE 32
 	
@@ -10,10 +8,13 @@
 	
 	#define DEFMASK 0x00FF0000,0x0000FF00,0x000000FF,0xFF000000
 	
-	extern void setupwindow (void);
-	extern void stopsdl (void);
-	extern void updatewindow (void);
-	extern void waitforrefresh (void);
+	extern void GUI_setup (void);
+	extern void GUI_tick (void);
 	
 	extern const char EM_GENERAL[];
+	
+	#ifdef _GIF
+		#include <SDL2/SDL.h>
+		extern SDL_Surface *WindowSurface;
+	#endif
 #endif
