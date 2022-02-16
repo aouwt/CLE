@@ -16,7 +16,7 @@ jobs:
     - name: install dependencies
       run: |
         sudo apt update
-        sudo apt install -y libsdl2-dev libsdl2-ttf-dev libgifwrap-dev
+        sudo apt install -y libsdl2-dev libsdl2-ttf-dev libgif-dev
     
     - name: install gifwrap
       run: |
