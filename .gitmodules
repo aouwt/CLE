@@ -1,5 +1,0 @@
-[submodule "SDL_gifwrap"]
-	path = SDL_gifwrap
-	url = https://github.com/aouwt/SDL_gifwrap.git
-[submodule "."]
-	branch = master

@@ -43,14 +43,16 @@ clean:
 	rm ./src/*.o
 
 @PHONY: all clean
-	
+
+
+${GIF_O}: ${CLE_O} ${GUI_O}
+	c++ -D_GIF -D_GUI ${CFLAGS} ${GIF_DEP_FLAG} -c ${GIF_C} -o ${GIF_O}
+
+
 ${CLE_O}:
 	c++ $(if wildcard(${GUI_O}),-D_GUI) $(if wildcard(${GIF_O}),-D_GIF) ${CFLAGS} ${CLE_DEP_FLAG} -c ${CLE_C} -o ${CLE_O}
 	
 
 ${GUI_O}: ${CLE_O}
-	c++ -D_GUI ${CFLAGS} ${GUI_DEP_FLAG} -c ${GUI_C} -o ${GUI_O}
-
-${GIF_O}: ${CLE_O} ${GUI_O}
-	c++ -D_GIF -D_GUI ${CFLAGS} ${GIF_DEP_FLAG} -c ${GIF_C} -o ${GIF_O}
+	c++ -D_GUI $(if wildcard(${GIF_O}),-D_GIF) ${CFLAGS} ${GUI_DEP_FLAG} -c ${GUI_C} -o ${GUI_O}
 

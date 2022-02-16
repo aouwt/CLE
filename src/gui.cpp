@@ -1,5 +1,6 @@
 #include "cle.hpp"
 #include "gui.hpp"
+#include "gif.hpp"
 #include <stdio.h>
 #include <cstdlib>
 #include <errno.h>
@@ -250,5 +251,5 @@ void waitforrefresh (void) {
 
 
 void GUI_setup (void) {	setupwindow ();	}
-void GUI_tick (void) {	waitforrefresh (); updatewindow ();	}
+void GUI_tick (void) {	updatewindow (); waitforrefresh ();	}
 

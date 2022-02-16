@@ -208,15 +208,15 @@ void updatebeams (void) {
 	unsigned int x, y;
 
 	// clear the board and transfer to new array
-	for (x = 0; x != Board.width; x++) {
-		for (y = 0; y != Board.height; y++) {
+	for (x = 0; x != Board.width; x ++) {
+		for (y = 0; y != Board.height; y ++) {
 			newboard[x][y] = Board.board[x][y].beam;
 			Board.board[x][y].beam = {0};
 		}
 	}
 
-	for (x = 0; x != Board.width; x++) {
-		for (y = 0; y != Board.height; y++) {
+	for (x = 0; x != Board.width; x ++) {
+		for (y = 0; y != Board.height; y ++) {
 			if (x != Board.width-1) Board.board[x][y].beam.l = newboard[x+1][y].l;
 			if (y != Board.height-1) Board.board[x][y].beam.u = newboard[x][y+1].u;
 			if (x) Board.board[x][y].beam.r = newboard[x-1][y].r;
@@ -230,8 +230,8 @@ void updatebeams (void) {
 void tick (void) {
 	updatebeams ();
 	unsigned int x, y;
-	for (y = 0; y != Board.height; y++) {
-		for (x = 0; x != Board.width; x++)
+	for (y = 0; y != Board.height; y ++) {
+		for (x = 0; x != Board.width; x ++)
 			Board.board[x][y].runcell ();
 	}
 }
@@ -241,7 +241,7 @@ void tick (void) {
 void initboard (unsigned int width, unsigned int height) {
 	Board.board = new class cell* [width+1];
 
-	for(unsigned int i = 0; i < width+1; ++i)
+	for(unsigned int i = 0; i < width+1; ++ i)
 		Board.board[i] = new class cell [height+1];
 
 	Board.width = width; Board.height = height;
@@ -260,8 +260,8 @@ void loadboard (FILE* f) {
 
 	unsigned int x, y;
 	unsigned int w = 0, h = 0;
-	for (y = 0; y != 1024; y++) {
-		for (x = 0; x != 1024; x++) {
+	for (y = 0; y != 1024; y ++) {
+		for (x = 0; x != 1024; x ++) {
 
 			int c = fgetc (f);
 			if (c == EOF)
@@ -271,14 +271,14 @@ void loadboard (FILE* f) {
 			else tempboard[x][y] = c;
 
 		}
-		if (x > w) w =x;
+		if (x > w) w = x;
 	}
 
 	next:;
 	h = y;
 	initboard (w, h);
-	for (y = 0; y != h; y++) {
-		for (x = 0; x != w; x++) {
+	for (y = 0; y != h; y ++) {
+		for (x = 0; x != w; x ++) {
 			switch (tempboard[x][y]) {
 				case 'r': case 'R': Board.board[x][y].state = RED; break;
 				case 'g': case 'G': Board.board[x][y].state = GREEN; break;
@@ -321,13 +321,13 @@ int main (int argcount, char* args[]) {
 	char* file = NULL;
 	
 	// argument parser
-	for (unsigned char i = 1; args[i] != NULL; i++) {
+	for (unsigned char i = 1; args[i] != NULL; i ++) {
 
 		if (args[i][0] == '-') {
 			char* arg = args[i] + 1;
 
 			if (arg[0] == '-') {
-				for (unsigned char al = 0; aliases[al].s != 0; al++) {
+				for (unsigned char al = 0; aliases[al].s != 0; al ++) {
 					if (!strcmp (aliases[al].a, args[i])) {
 						arg = &aliases[al].s;
 						goto checkarg;
@@ -337,10 +337,10 @@ int main (int argcount, char* args[]) {
 			}
 			
 			checkarg:
-			for (unsigned char ac = 0; arg [ac]; ac ++) {
+			for (unsigned char ac = 0; arg[ac]; ac ++) {
 				switch (arg[0]) {
 					case 'h':
-					printhelpscreen (args [0]);
+					printhelpscreen (args[0]);
 					exit (0);
 					break;
 
@@ -353,11 +353,11 @@ int main (int argcount, char* args[]) {
 						break;
 
 					case 'D':
-						Opt_Delay = atoi (args [++ i]) * 1000;
+						Opt_Delay = atoi (args[++ i]) * 1000;
 						break;
 					
 					case 'g':
-						Opt_GIF = args [++ i];
+						Opt_GIF = args[++ i];
 						break;
 
 					default:
@@ -386,6 +386,7 @@ int main (int argcount, char* args[]) {
 		GUI_setup ();
 	#endif
 	#ifdef _GIF
+		GUI_tick ();
 		if (Opt_GIF != NULL) GIF_setup ();
 	#endif
 	
